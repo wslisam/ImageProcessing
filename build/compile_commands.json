@@ -1,0 +1,7 @@
+[
+{
+  "directory": "C:/Users/Sam Li/C-Project/ImageProcessing/build",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1421~1.277\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP  -IC:\\opencv\\build\\include  /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1   /FoCMakeFiles\\ImageProcessing.dir\\main.cpp.obj /FdTARGET_COMPILE_PDB /FS -c \"C:\\Users\\Sam Li\\C-Project\\ImageProcessing\\main.cpp\"",
+  "file": "C:/Users/Sam Li/C-Project/ImageProcessing/main.cpp"
+}
+]
