@@ -1,44 +1,38 @@
-#include <iostream>
-//#include <opencv2/core.hpp>
-//#include <opencv2/highgui.hpp>
-#include <opencv2/opencv.hpp>
-#include <opencv2/videoio.hpp>
-#define kernel_rows 3
-
-using namespace std;
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+// #include <opencv2/opencv.hpp>
 
 using namespace cv;
 
-int main(int, char**) {
-	cout << "test cv";
+// cv::Sobel(InputArray Src,	// input image
+//   OutputArray dst,	// output image ( same size )
+//   int depth, int dx, int dy,
+//   int ksize,  // kernel大小 1,3,5,7
+//   double scale = 1, double delta = 0, int borderType = BORDER_DEFAULT);
 
-	Mat frame;
-	Mat gray, edge;
-	VideoCapture cap;
+int main() {
+	Mat grad_x, grad_y, dst;
+	Mat src = imread("lenna.jpg");
 
-	cap.open(0);
+	namedWindow("OLD");
+	imshow("OLD", src);
 
-	if (!cap.isOpened()) {
-		cout << "error opening camera" << endl;
-		return -1;
-	}
+	// x-dir
+	Sobel(src, grad_x, CV_8U, 1, 0, 3, 1, 0, BORDER_DEFAULT);
 
-	for (;;) {
-		cap.read(frame);
-		if (frame.empty()) {
-			cout << "blank image" << endl;
-			break;
-		}
+	namedWindow("x-dir");
+	imshow("x-dir", grad_x);
 
-		cvtColor(frame, gray, COLOR_BGR2GRAY);
-		blur(gray, edge, Size(30, 30));
-		Canny(edge, edge, 3, 9);
-		imshow("Webcam testing windows", edge);
-		if (waitKey(5) > 0) {
-			cout << "program terminated" << endl;
-			break;
-		}
-	}
+	// y-dir
+	Sobel(src, grad_y, CV_8U, 0, 1, 3, 1, 0, BORDER_DEFAULT);
+	namedWindow("y-dir");
+	imshow("y-dir", grad_y);
 
+	//合并的
+	addWeighted(grad_x, 0.5, grad_y, 0.5, 0, dst);
+	namedWindow("x+y");
+	imshow("x+y", dst);
+
+	waitKey(0);
 	return 0;
 }
