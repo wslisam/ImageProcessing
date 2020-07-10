@@ -50,32 +50,32 @@ The CXX compiler identification is MSVC, found in "C:/Users/Sam Li/C-Project/Ima
 Determining if the C compiler works passed with the following output:
 Change Dir: C:/Users/Sam Li/C-Project/ImageProcessing/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):C:/PROGRA~1/NINJA-~1/ninja.exe cmTC_ab026 && [1/2] Building C object CMakeFiles\cmTC_ab026.dir\testCCompiler.c.obj
-[2/2] Linking C executable cmTC_ab026.exe
+Run Build Command(s):C:/PROGRA~1/NINJA-~1/ninja.exe cmTC_60354 && [1/2] Building C object CMakeFiles\cmTC_60354.dir\testCCompiler.c.obj
+[2/2] Linking C executable cmTC_60354.exe
 
 
 
 Detecting C compiler ABI info compiled with the following output:
 Change Dir: C:/Users/Sam Li/C-Project/ImageProcessing/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):C:/PROGRA~1/NINJA-~1/ninja.exe cmTC_f308e && [1/2] Building C object CMakeFiles\cmTC_f308e.dir\CMakeCCompilerABI.c.obj
-[2/2] Linking C executable cmTC_f308e.exe
+Run Build Command(s):C:/PROGRA~1/NINJA-~1/ninja.exe cmTC_7b45d && [1/2] Building C object CMakeFiles\cmTC_7b45d.dir\CMakeCCompilerABI.c.obj
+[2/2] Linking C executable cmTC_7b45d.exe
 
 
 
 Determining if the CXX compiler works passed with the following output:
 Change Dir: C:/Users/Sam Li/C-Project/ImageProcessing/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):C:/PROGRA~1/NINJA-~1/ninja.exe cmTC_9a12e && [1/2] Building CXX object CMakeFiles\cmTC_9a12e.dir\testCXXCompiler.cxx.obj
-[2/2] Linking CXX executable cmTC_9a12e.exe
+Run Build Command(s):C:/PROGRA~1/NINJA-~1/ninja.exe cmTC_ac840 && [1/2] Building CXX object CMakeFiles\cmTC_ac840.dir\testCXXCompiler.cxx.obj
+[2/2] Linking CXX executable cmTC_ac840.exe
 
 
 
 Detecting CXX compiler ABI info compiled with the following output:
 Change Dir: C:/Users/Sam Li/C-Project/ImageProcessing/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):C:/PROGRA~1/NINJA-~1/ninja.exe cmTC_3ab97 && [1/2] Building CXX object CMakeFiles\cmTC_3ab97.dir\CMakeCXXCompilerABI.cpp.obj
-[2/2] Linking CXX executable cmTC_3ab97.exe
+Run Build Command(s):C:/PROGRA~1/NINJA-~1/ninja.exe cmTC_35111 && [1/2] Building CXX object CMakeFiles\cmTC_35111.dir\CMakeCXXCompilerABI.cpp.obj
+[2/2] Linking CXX executable cmTC_35111.exe
 
 
 
