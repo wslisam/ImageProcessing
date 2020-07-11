@@ -1,38 +1,49 @@
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-// #include <opencv2/opencv.hpp>
+
+#include <opencv2/highgui/highgui_c.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <iostream>
+#include <opencv2/opencv.hpp>
 
 using namespace cv;
 
-// cv::Sobel(InputArray Src,	// input image
-//   OutputArray dst,	// output image ( same size )
-//   int depth, int dx, int dy,
-//   int ksize,  // kernel大小 1,3,5,7
-//   double scale = 1, double delta = 0, int borderType = BORDER_DEFAULT);
+int main(int argc, char **argv) {
+	Mat z = imread("color2.webp", IMREAD_COLOR);
 
-int main() {
-	Mat grad_x, grad_y, dst;
-	Mat src = imread("lenna.jpg");
-
-	namedWindow("OLD");
-	imshow("OLD", src);
-
-	// x-dir
-	Sobel(src, grad_x, CV_8U, 1, 0, 3, 1, 0, BORDER_DEFAULT);
-
-	namedWindow("x-dir");
-	imshow("x-dir", grad_x);
-
-	// y-dir
-	Sobel(src, grad_y, CV_8U, 0, 1, 3, 1, 0, BORDER_DEFAULT);
-	namedWindow("y-dir");
-	imshow("y-dir", grad_y);
-
-	//合并的
-	addWeighted(grad_x, 0.5, grad_y, 0.5, 0, dst);
-	namedWindow("x+y");
-	imshow("x+y", dst);
-
-	waitKey(0);
+	Mat M = Mat_<double>(z.rows * z.cols, 6);
+	Mat I = Mat_<double>(z.rows * z.cols, 1);
+	for (int i = 0; i < z.rows; i++)
+		for (int j = 0; j < z.cols; j++) {
+			double x = (j - z.cols / 2) / double(z.cols),
+				   y = (i - z.rows / 2) / double(z.rows);
+			M.at<double>(i * z.cols + j, 0) = x * x;
+			M.at<double>(i * z.cols + j, 1) = y * y;
+			M.at<double>(i * z.cols + j, 2) = x * y;
+			M.at<double>(i * z.cols + j, 3) = x;
+			M.at<double>(i * z.cols + j, 4) = y;
+			M.at<double>(i * z.cols + j, 5) = 1;
+			I.at<double>(i * z.cols + j, 0) = z.at<uchar>(i, j);
+		}
+	SVD s(M);
+	Mat q;
+	s.backSubst(I, q);
+	std::cout << q;
+	imshow("Orignal", z);
+	std::cout << q.at<double>(2, 0);
+	Mat background(z.rows, z.cols, CV_8UC1);
+	for (int i = 0; i < z.rows; i++)
+		for (int j = 0; j < z.cols; j++) {
+			double x = (j - z.cols / 2) / double(z.cols),
+				   y = (i - z.rows / 2) / double(z.rows);
+			double quad = q.at<double>(0, 0) * x * x +
+						  q.at<double>(1, 0) * y * y +
+						  q.at<double>(2, 0) * x * y;
+			quad += q.at<double>(3, 0) * x + q.at<double>(4, 0) * y +
+					q.at<double>(5, 0);
+			background.at<uchar>(i, j) = saturate_cast<uchar>(quad);
+		}
+	imshow("Simulated background", background);
+	waitKey();
 	return 0;
 }
