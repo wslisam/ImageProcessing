@@ -1,17 +1,39 @@
+// {
+//     "configurations": [
+//         {
+//             "name": "Win32",
+//             "includePath": [
+//                 "${workspaceFolder}/**",
+//                 "/Users/Sam Li/C-Project/OpenCVRoot/opencv/sources/include/opencv2"
+//             ],
+//             "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+//             "windowsSdkVersion": "10.0.17763.0",
+//             "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.21.27702/bin/Hostx64/x64/cl.exe",
+//             "cStandard": "c11",
+//             "cppStandard": "c++17",
+//             "intelliSenseMode": "msvc-x64"
+//         }
+//     ],
+//     "version": 4
+// }
+
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/Users/Sam Li/C-Project/OpenCVRoot/opencv/sources/include/opencv2"
+                "/usr/local/Cellar/opencv/4.3.0_5/include/opencv4"
+
             ],
-            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
-            "windowsSdkVersion": "10.0.17763.0",
-            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.21.27702/bin/Hostx64/x64/cl.exe",
+            "defines": [],
+            "macFrameworkPath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "msvc-x64"
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4
