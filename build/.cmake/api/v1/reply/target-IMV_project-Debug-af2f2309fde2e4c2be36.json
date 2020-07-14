@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "startProject"
+			"path" : "IMV_project"
 		}
 	],
 	"backtrace" : 1,
@@ -70,7 +70,7 @@
 			]
 		}
 	],
-	"id" : "startProject::@6890427a1f51a3e7e1df",
+	"id" : "IMV_project::@6890427a1f51a3e7e1df",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -350,8 +350,8 @@
 		],
 		"language" : "CXX"
 	},
-	"name" : "startProject",
-	"nameOnDisk" : "startProject",
+	"name" : "IMV_project",
+	"nameOnDisk" : "IMV_project",
 	"paths" : 
 	{
 		"build" : ".",

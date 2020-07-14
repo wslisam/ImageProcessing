@@ -153,17 +153,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named startProject
+# Target rules for targets named IMV_project
 
 # Build rule for target.
-startProject: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 startProject
-.PHONY : startProject
+IMV_project: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 IMV_project
+.PHONY : IMV_project
 
 # fast build rule for target.
-startProject/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/startProject.dir/build.make CMakeFiles/startProject.dir/build
-.PHONY : startProject/fast
+IMV_project/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/IMV_project.dir/build.make CMakeFiles/IMV_project.dir/build
+.PHONY : IMV_project/fast
 
 main.o: main.cpp.o
 
@@ -171,7 +171,7 @@ main.o: main.cpp.o
 
 # target to build an object file
 main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/startProject.dir/build.make CMakeFiles/startProject.dir/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/IMV_project.dir/build.make CMakeFiles/IMV_project.dir/main.cpp.o
 .PHONY : main.cpp.o
 
 main.i: main.cpp.i
@@ -180,7 +180,7 @@ main.i: main.cpp.i
 
 # target to preprocess a source file
 main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/startProject.dir/build.make CMakeFiles/startProject.dir/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/IMV_project.dir/build.make CMakeFiles/IMV_project.dir/main.cpp.i
 .PHONY : main.cpp.i
 
 main.s: main.cpp.s
@@ -189,7 +189,7 @@ main.s: main.cpp.s
 
 # target to generate assembly for a file
 main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/startProject.dir/build.make CMakeFiles/startProject.dir/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/IMV_project.dir/build.make CMakeFiles/IMV_project.dir/main.cpp.s
 .PHONY : main.cpp.s
 
 # Help Target
@@ -202,7 +202,7 @@ help:
 	@echo "... package"
 	@echo "... package_source"
 	@echo "... rebuild_cache"
-	@echo "... startProject"
+	@echo "... IMV_project"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

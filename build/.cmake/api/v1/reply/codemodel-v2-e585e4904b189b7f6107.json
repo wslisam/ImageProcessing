@@ -26,7 +26,7 @@
 					[
 						0
 					],
-					"name" : "startProject",
+					"name" : "IMV_Project",
 					"targetIndexes" : 
 					[
 						0
@@ -37,9 +37,9 @@
 			[
 				{
 					"directoryIndex" : 0,
-					"id" : "startProject::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-startProject-Debug-8dd8b6db9d12ed9bf78e.json",
-					"name" : "startProject",
+					"id" : "IMV_project::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-IMV_project-Debug-af2f2309fde2e4c2be36.json",
+					"name" : "IMV_project",
 					"projectIndex" : 0
 				}
 			]

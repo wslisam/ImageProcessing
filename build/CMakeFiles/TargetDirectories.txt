@@ -2,4 +2,4 @@
 /Users/wsli1998/Documents/ImageProcessing/build/CMakeFiles/edit_cache.dir
 /Users/wsli1998/Documents/ImageProcessing/build/CMakeFiles/package_source.dir
 /Users/wsli1998/Documents/ImageProcessing/build/CMakeFiles/package.dir
-/Users/wsli1998/Documents/ImageProcessing/build/CMakeFiles/startProject.dir
+/Users/wsli1998/Documents/ImageProcessing/build/CMakeFiles/IMV_project.dir

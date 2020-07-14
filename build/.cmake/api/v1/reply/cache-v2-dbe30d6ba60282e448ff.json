@@ -827,7 +827,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "startProject"
+			"value" : "IMV_Project"
 		},
 		{
 			"name" : "CMAKE_RANLIB",
@@ -1120,6 +1120,30 @@
 			],
 			"type" : "INTERNAL",
 			"value" : "[/usr/local/Cellar/opencv/4.3.0_5][v4.3.0()]"
+		},
+		{
+			"name" : "IMV_Project_BINARY_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/Users/wsli1998/Documents/ImageProcessing/build"
+		},
+		{
+			"name" : "IMV_Project_SOURCE_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/Users/wsli1998/Documents/ImageProcessing"
 		},
 		{
 			"name" : "OpenCV_DIR",
