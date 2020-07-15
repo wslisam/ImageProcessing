@@ -40,3 +40,4 @@ CV\_<bit_depth>(S|U|F)C<number_of_channels>
 
 ```
 
+Automated Optical Inspection (AOI)
