@@ -67,9 +67,9 @@ cv::Mat color_bilinear(cv::Mat img, double rx, double ry)
 			// compute bi-linear
 			for (int c = 0; c < channel; c++)
 			{
-				val = (1. - dx) * (1. - dy) * img.at<cv::Vec3b>(y_before, x_before)[c] +
-					  dx * (1. - dy) * img.at<cv::Vec3b>(y_before, x_before + 1)[c] +
-					  (1. - dx) * dy * img.at<cv::Vec3b>(y_before + 1, x_before)[c] +
+				val = (1.0 - dx) * (1.0 - dy) * img.at<cv::Vec3b>(y_before, x_before)[c] +
+					  dx * (1.0 - dy) * img.at<cv::Vec3b>(y_before, x_before + 1)[c] +
+					  (1.0 - dx) * dy * img.at<cv::Vec3b>(y_before + 1, x_before)[c] +
 					  dx * dy * img.at<cv::Vec3b>(y_before + 1, x_before)[c];
 
 				// assign pixel to new position
@@ -80,32 +80,36 @@ cv::Mat color_bilinear(cv::Mat img, double rx, double ry)
 	return out;
 }
 
-cv::Mat color_bilinear_buildin(cv::Mat img)
+cv::Mat color_bilinear_buildin(cv::Mat img, double r1, double r2)
 {
 	int width = img.cols;
 	int height = img.rows;
 
 	cv::Mat out = cv::Mat::zeros(height, width, CV_8UC3);
-	cv::resize(img, out, img.size(), 0, 0, cv::INTER_LINEAR);
+	cv::resize(img, out, img.size(), r1, r2, cv::INTER_LINEAR);
 	return out;
 }
 
-cv::Mat gray_bilinear_buildin(cv::Mat img)
+cv::Mat gray_bilinear_buildin(cv::Mat img, double r1, double r2)
 {
 	int width = img.cols;
 	int height = img.rows;
 
 	cv::Mat out = cv::Mat::zeros(height, width, CV_8UC1);
-	cv::resize(img, out, img.size(), 0, 0, cv::INTER_LINEAR);
+	cv::resize(img, out, img.size(), r1, r2, cv::INTER_LINEAR);
 
 	return out;
 }
 
 cv::Mat gray_bilinear(cv::Mat img)
 {
+
 	int width = img.cols;
 	int height = img.rows;
 	int channel = img.channels();
+
+	int x_before, y_before;
+	double dx, dy;
 	double val;
 
 	cv::Mat out = cv::Mat::zeros(height, width, CV_8UC1);
@@ -113,13 +117,20 @@ cv::Mat gray_bilinear(cv::Mat img)
 	// bi-linear interpolation
 	for (int y = 0; y < height; y++)
 	{
+		y_before = (int)floor(y); //The floor() function takes a single argument and returns a value of type double, float or long double type.
+		y_before = fmin(y_before, height - 1);
+		dy = y - y_before;
+
 		for (int x = 0; x < width; x++)
 		{
-			val = (img.at<uchar>(y, x) +
-				   img.at<uchar>(y, x + 1) +
-				   img.at<uchar>(y + 1, x) +
-				   img.at<uchar>(y + 1, x)) /
-				  4;
+			x_before = (int)floor(x);
+			x_before = fmin(x_before, width - 1);
+			dx = x - x_before;
+
+			val = (1.0 - dx) * (1.0 - dy) * img.at<uchar>(y_before, x_before) +
+				  dx * (1.0 - dy) * img.at<uchar>(y_before, x_before + 1) +
+				  (1.0 - dx) * dy * img.at<uchar>(y_before + 1, x_before) +
+				  dx * dy * img.at<uchar>(y_before + 1, x_before);
 
 			out.at<uchar>(y, x) = (uchar)val;
 		}
