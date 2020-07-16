@@ -6,8 +6,10 @@ using namespace std;
 int main(int argc, char **argv)
 {
 
-	cv::Mat img = cv::imread("./2/input3.bmp");
-	cv::Mat mask = cv::imread("./2/Mask.bmp");
+	cv::Mat img = cv::imread("./Surface_Fitting_image/3/input3.bmp");
+	cv::Mat mask = cv::imread("./Surface_Fitting_image/3/Mask.bmp");
+	
+
 	cv::Mat fit_img;
 
 	if (img.empty())

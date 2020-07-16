@@ -26,25 +26,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 11,
+				"line" : 12,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 12,
+				"line" : 13,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 9,
-				"parent" : 0
-			},
-			{
-				"command" : 2,
-				"file" : 0,
-				"line" : 10,
+				"line" : 11,
 				"parent" : 0
 			}
 		]
@@ -65,10 +59,6 @@
 			[
 				{
 					"backtrace" : 3,
-					"path" : "/Users/wsli1998/Documents/ImageProcessing"
-				},
-				{
-					"backtrace" : 4,
 					"isSystem" : true,
 					"path" : "/usr/local/Cellar/opencv/4.3.0_5/include/opencv4"
 				}
