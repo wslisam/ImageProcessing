@@ -1,14 +1,11 @@
 #include "processing.h"
 
-using namespace std;
-//using namespace cv;
-
 bool light_diff(int current, int last)
 {
 	// calculate the difference of that block / pixel
 	int diff = abs(current - last);
 
-	if (diff > 10)
+	if (diff > 10)   //big difference !?
 	{
 		return true;
 	}

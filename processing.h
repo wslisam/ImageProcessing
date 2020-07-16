@@ -8,6 +8,9 @@
 #include <math.h>
 #include <complex>
 
+using namespace std;
+// using namespace cv;
+
 bool light_diff(int current, int last);
 int ConnectedComponents(cv::Mat img);
 cv::Mat color_bilinear(cv::Mat img, double rx = 1, double ry = 1);
