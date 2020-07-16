@@ -1156,30 +1156,6 @@
 			],
 			"type" : "PATH",
 			"value" : "/usr/local/lib/cmake/opencv4"
-		},
-		{
-			"name" : "startProject_BINARY_DIR",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Value Computed by CMake"
-				}
-			],
-			"type" : "STATIC",
-			"value" : "/Users/wsli1998/Documents/ImageProcessing/build"
-		},
-		{
-			"name" : "startProject_SOURCE_DIR",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "Value Computed by CMake"
-				}
-			],
-			"type" : "STATIC",
-			"value" : "/Users/wsli1998/Documents/ImageProcessing"
 		}
 	],
 	"kind" : "cache",

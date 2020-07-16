@@ -218,12 +218,6 @@ IMV_Project_SOURCE_DIR:STATIC=/Users/wsli1998/Documents/ImageProcessing
 //The directory containing a CMake configuration file for OpenCV.
 OpenCV_DIR:PATH=/usr/local/lib/cmake/opencv4
 
-//Value Computed by CMake
-startProject_BINARY_DIR:STATIC=/Users/wsli1998/Documents/ImageProcessing/build
-
-//Value Computed by CMake
-startProject_SOURCE_DIR:STATIC=/Users/wsli1998/Documents/ImageProcessing
-
 
 ########################
 # INTERNAL cache entries

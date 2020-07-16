@@ -1,10 +1,4 @@
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <opencv2/opencv.hpp>
-#include <math.h>
-#include <complex>
+#include "processing.h"
 
 using namespace std;
 //using namespace cv;
@@ -26,25 +20,23 @@ int ConnectedComponents(cv::Mat img)
 {
 	// Use connected components to divide our possibles parts of images
 	cv::Mat labels;
-	int num_objects = connectedComponents(img, labels);
+	int num_objects = connectedComponents(img, labels); // connectivity=8 , type = CV_32S
 	// Check the number of objects detected
 	if (num_objects < 2)
 	{
 		cout << "No objects detected" << endl;
-		return num_objects-1;
+		return num_objects - 1;
 	}
 	else
 	{
 		cout << "Number of objects detected: " << num_objects - 1 << endl;
 	}
-	//backgroun = 1 
-	return num_objects-1;
+	//backgroun = 1
+	return num_objects - 1;
 }
 
-cv::Mat bilinear(cv::Mat img, double rx, double ry)
+cv::Mat color_bilinear(cv::Mat img, double rx = 1, double ry = 1)
 {
-
-	//normal rx and ry = 1
 	// get height and width
 	int width = img.cols;
 	int height = img.rows;
@@ -84,6 +76,43 @@ cv::Mat bilinear(cv::Mat img, double rx, double ry)
 				// assign pixel to new position
 				out.at<cv::Vec3b>(y, x)[c] = (uchar)val;
 			}
+		}
+	}
+
+	return out;
+}
+
+cv::Mat gray_bilinear(cv::Mat img)
+{
+	int width = img.cols;
+	int height = img.rows;
+	int channel = img.channels();
+
+	int x_before, y_before;
+	double dx, dy;
+	double val;
+
+	cv::Mat out = cv::Mat::zeros(height, width, CV_8UC1);
+
+	// bi-linear interpolation
+	for (int y = 0; y < height; y++)
+	{
+		y_before = (int)floor(y); //The floor() function takes a single argument and returns a value of type double, float or long double type.
+		y_before = fmin(y_before, height - 1);
+		dy = y - y_before;
+
+		for (int x = 0; x < width; x++)
+		{
+			x_before = (int)floor(x);
+			x_before = fmin(x_before, width - 1);
+			dx = x - x_before;
+
+			val = (1.0 - dx) * (1.0 - dy) * img.at<uchar>(y_before, x_before) +
+				  dx * (1.0 - dy) * img.at<uchar>(y_before, x_before + 1) +
+				  (1.0 - dx) * dy * img.at<uchar>(y_before + 1, x_before) +
+				  dx * dy * img.at<uchar>(y_before + 1, x_before);
+
+			out.at<uchar>(y, x) = (uchar)val;
 		}
 	}
 
@@ -167,6 +196,12 @@ int main(int argc, char **argv)
 	cv::Mat mask = cv::imread("./2/Mask.bmp");
 	cv::Mat fit_img;
 
+	if (img.empty())
+	{
+		cout << "!!! Failed imread(): image not found" << endl;
+		return -1;
+	}
+	cv::Mat test2 = color_bilinear(img);
 	//change the img to grayscale first
 	img = BGR2GRAY(img);
 
@@ -176,14 +211,16 @@ int main(int argc, char **argv)
 
 	cv::Mat after_filter = filter(img, out_mask);
 
-	cv::Mat test = bilinear(after_filter, 1, 1);
+	cv::Mat test = gray_bilinear(after_filter);
 
-	ConnectedComponents(after_filter);
+	int num_objects = ConnectedComponents(after_filter);
 
-	cv::imshow("sample ", img);
-	cv::imshow("mask after inverse", out_mask);
-	cv::imshow("after filter", after_filter);
-	cv::imshow("Bilinear Interpolation", test);
+	// cv::imshow("sample ", img);
+	// cv::imshow("mask after inverse", out_mask);
+	// cv::imshow("after filter", after_filter);
+	// cv::imshow("Bilinear Interpolation", test);
+	cv::imshow("Bilinear Interpolation2", test2);
+
 	cv::waitKey(0);
 	cv::destroyAllWindows();
 

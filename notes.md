@@ -63,3 +63,8 @@ file, gives it the same name as our project (${PROJECT_NAME}), and compiles our
 source code into an executable called CMakeTest, which we set as the project name.
 The ${} expression allows access to any variable defined in our environment.
 Then, we can use the ${PROJECT_NAME} variable as an executable output name.
+
+image watch opencv
+
+
+#include_directories("/Users/wsli1998/Documents/ImageProcessing")

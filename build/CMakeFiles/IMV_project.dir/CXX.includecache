@@ -7,6 +7,10 @@
 #IncludeRegexTransform: 
 
 /Users/wsli1998/Documents/ImageProcessing/main.cpp
+processing.h
+/Users/wsli1998/Documents/ImageProcessing/processing.h
+
+/Users/wsli1998/Documents/ImageProcessing/processing.h
 stdio.h
 -
 stdlib.h
