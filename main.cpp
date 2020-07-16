@@ -3,8 +3,8 @@
 int main(int argc, char **argv)
 {
 
-	cv::Mat img = cv::imread("./Surface_Fitting_image/3/input3.bmp");
-	cv::Mat mask = cv::imread("./Surface_Fitting_image/3/Mask.bmp");
+	cv::Mat img = cv::imread("./Surface_Fitting_image/1/input3.bmp");
+	cv::Mat mask = cv::imread("./Surface_Fitting_image/1/Mask.bmp");
 
 	cv::Mat fit_img;
 
@@ -14,8 +14,13 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	// cv::Mat test2 = color_bilinear(img);
+	// cv::Mat test3 = color_bilinear_buildin(img);
+
 	//change the img to grayscale first
 	img = BGR2GRAY(img);
+
+	cv::Mat test2 = gray_bilinear(img);
+	cv::Mat test3 = gray_bilinear_buildin(img);
 
 	//inverse the mask
 	cv::Mat out_mask = ~mask;
@@ -27,11 +32,13 @@ int main(int argc, char **argv)
 
 	int num_objects = ConnectedComponents(after_filter);
 
-	cv::imshow("sample ", img);
-	cv::imshow("mask after inverse", out_mask);
-	cv::imshow("after filter", after_filter);
+	// cv::imshow("sample ", img);
+	// cv::imshow("mask after inverse", out_mask);
+	// cv::imshow("after filter", after_filter);
 	// cv::imshow("Bilinear Interpolation", test);
-	// cv::imshow("Bilinear Interpolation2", test2);
+	cv::imshow("Bilinear Interpolation2", test2);
+	cv::imshow("Bilinear Interpolation3", test3);
+
 
 	cv::waitKey(0);
 	cv::destroyAllWindows();
