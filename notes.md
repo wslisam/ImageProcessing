@@ -41,3 +41,25 @@ CV\_<bit_depth>(S|U|F)C<number_of_channels>
 ```
 
 Automated Optical Inspection (AOI)
+
+
+CMake uses configuration files called CMakeLists.txt, where the compilation and
+dependency processes are defined. For a basic project, based on an executable build
+from one source code file, a two-line CMakeLists.txt file is all that is needed. The
+file looks like this:
+```
+cmake_minimum_required (VERSION 2.6)
+project (CMakeTest)
+add_executable(${PROJECT_NAME} main.cpp)
+```
+
+The first line defines the minimum version of CMake required. This line is
+mandatory in our CMakeLists.txt file and allows you to use the cmake functionality
+defined from a given version defined in the second line; it defines the project name.
+This name is saved in a variable called PROJECT_NAME.
+
+The last line creates an executable command (add_executable()) in the main.cpp
+file, gives it the same name as our project (${PROJECT_NAME}), and compiles our
+source code into an executable called CMakeTest, which we set as the project name.
+The ${} expression allows access to any variable defined in our environment.
+Then, we can use the ${PROJECT_NAME} variable as an executable output name.

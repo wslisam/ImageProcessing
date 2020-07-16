@@ -22,6 +22,25 @@ bool light_diff(int current, int last)
 	return false;
 }
 
+int ConnectedComponents(cv::Mat img)
+{
+	// Use connected components to divide our possibles parts of images
+	cv::Mat labels;
+	int num_objects = connectedComponents(img, labels);
+	// Check the number of objects detected
+	if (num_objects < 2)
+	{
+		cout << "No objects detected" << endl;
+		return num_objects-1;
+	}
+	else
+	{
+		cout << "Number of objects detected: " << num_objects - 1 << endl;
+	}
+	//backgroun = 1 
+	return num_objects-1;
+}
+
 cv::Mat bilinear(cv::Mat img, double rx, double ry)
 {
 
@@ -144,8 +163,8 @@ cv::Mat thresholding(cv::Mat input, int threshold)
 int main(int argc, char **argv)
 {
 
-	cv::Mat img = cv::imread("./1/input3.bmp");
-	cv::Mat mask = cv::imread("./1/Mask.bmp");
+	cv::Mat img = cv::imread("./2/input3.bmp");
+	cv::Mat mask = cv::imread("./2/Mask.bmp");
 	cv::Mat fit_img;
 
 	//change the img to grayscale first
@@ -158,6 +177,9 @@ int main(int argc, char **argv)
 	cv::Mat after_filter = filter(img, out_mask);
 
 	cv::Mat test = bilinear(after_filter, 1, 1);
+
+	ConnectedComponents(after_filter);
+
 	cv::imshow("sample ", img);
 	cv::imshow("mask after inverse", out_mask);
 	cv::imshow("after filter", after_filter);
