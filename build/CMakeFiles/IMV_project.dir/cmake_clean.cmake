@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/IMV_project.dir/main.cpp.o"
+  "CMakeFiles/IMV_project.dir/processing.cpp.o"
   "IMV_project"
   "IMV_project.pdb"
 )

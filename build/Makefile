@@ -192,6 +192,33 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/IMV_project.dir/build.make CMakeFiles/IMV_project.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+processing.o: processing.cpp.o
+
+.PHONY : processing.o
+
+# target to build an object file
+processing.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/IMV_project.dir/build.make CMakeFiles/IMV_project.dir/processing.cpp.o
+.PHONY : processing.cpp.o
+
+processing.i: processing.cpp.i
+
+.PHONY : processing.i
+
+# target to preprocess a source file
+processing.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/IMV_project.dir/build.make CMakeFiles/IMV_project.dir/processing.cpp.i
+.PHONY : processing.cpp.i
+
+processing.s: processing.cpp.s
+
+.PHONY : processing.s
+
+# target to generate assembly for a file
+processing.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/IMV_project.dir/build.make CMakeFiles/IMV_project.dir/processing.cpp.s
+.PHONY : processing.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -206,6 +233,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... processing.o"
+	@echo "... processing.i"
+	@echo "... processing.s"
 .PHONY : help
 
 

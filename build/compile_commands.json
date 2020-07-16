@@ -1,7 +1,12 @@
 [
 {
   "directory": "/Users/wsli1998/Documents/ImageProcessing/build",
-  "command": "/usr/bin/clang++   -isystem /usr/local/Cellar/opencv/4.3.0_5/include/opencv4  -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/IMV_project.dir/main.cpp.o -c /Users/wsli1998/Documents/ImageProcessing/main.cpp",
+  "command": "/usr/bin/clang++   -I/Users/wsli1998/Documents/ImageProcessing -isystem /usr/local/Cellar/opencv/4.3.0_5/include/opencv4  -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/IMV_project.dir/main.cpp.o -c /Users/wsli1998/Documents/ImageProcessing/main.cpp",
   "file": "/Users/wsli1998/Documents/ImageProcessing/main.cpp"
+},
+{
+  "directory": "/Users/wsli1998/Documents/ImageProcessing/build",
+  "command": "/usr/bin/clang++   -I/Users/wsli1998/Documents/ImageProcessing -isystem /usr/local/Cellar/opencv/4.3.0_5/include/opencv4  -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -std=gnu++11 -o CMakeFiles/IMV_project.dir/processing.cpp.o -c /Users/wsli1998/Documents/ImageProcessing/processing.cpp",
+  "file": "/Users/wsli1998/Documents/ImageProcessing/processing.cpp"
 }
 ]

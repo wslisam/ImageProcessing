@@ -6,28 +6,7 @@
             "command": "/usr/bin/clang++",
             "args": [
                 "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "type": "shell",
-            "label": "C/C++: g++-10 build active file",
-            "command": "/usr/local/bin/g++-10",
-            "args": [
-                "-g",
-                "${file}",
+                "${file}/**.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
