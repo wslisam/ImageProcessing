@@ -22,5 +22,6 @@ cv::Mat color_bilinear(cv::Mat img, double rx = 1, double ry = 1);
 cv::Mat gray_bilinear_buildin(cv::Mat img, double r1 = 0.0, double r2 = 0.0);
 cv::Mat color_bilinear_buildin(cv::Mat img, double r1 = 0.0, double r2 = 0.0);
 cv::Mat planefit(cv::Mat input, cv::Mat output, int num_row, int num_col, int threshold);
+cv::Mat segmentation(cv::Mat input , int x_pos , int y_pos , int w , int h);
 
 #endif
