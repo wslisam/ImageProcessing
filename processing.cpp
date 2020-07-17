@@ -208,3 +208,11 @@ cv::Mat thresholding(cv::Mat input, int threshold)
 
 	return out;
 }
+
+cv::Mat segmentation(cv::Mat input , int x_pos , int y_pos , int w , int h){
+
+   cv::Mat input_roi = input(cv::Rect(x_pos,y_pos,w,h));
+//    cv::imwrite("ROI.bmp",input_roi);
+   return input_roi;
+
+}

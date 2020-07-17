@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 	cv::imshow("Bilinear Interpolation2", test2);
 	cv::imshow("Bilinear Interpolation3", test3);
 
-
 	cv::waitKey(0);
 	cv::destroyAllWindows();
 
