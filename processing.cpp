@@ -139,13 +139,49 @@ cv::Mat gray_bilinear(cv::Mat img)
 	return out;
 }
 
-cv::Mat planefit(cv::Mat input, cv::Mat output, int num_row, int num_col, int threshold)
+cv::Mat single_planefit(cv::Mat img)
 {
-	int width = input.cols;
-	int height = input.rows;
-	cv::Mat out = cv::Mat::zeros(height, width, CV_8UC3);
+	int height = img.rows;
+	int width = img.cols;
+	int num_of_sample = 9 * 7;
+	cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
+	cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
+	cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
 
-	return out;
+	int current_row = 0;
+	int current_col = 0;
+	int x_before, y_before;
+	double dx, dy;
+	for (int y = 0; y < height; y += 50)
+	{
+		y_before = y;
+		y_before = fmin(y_before, height - 1);
+		dy = (y - y_before);
+		for (int x = 0; x < width; x += 200)
+		{
+
+			x_before = x;
+			x_before = fmin(x_before, width - 1);
+			dx = (x - x_before);
+
+			matrix_b.at<float>(current_row, 1) = img.at<uchar>(y, x);
+			// cout<<(uint)matrix_b.at<uchar>(current_row, 1)<<endl;
+			matrix_a.at<float>(current_row, current_col + 0) = (1.0 - dx) * (1.0 - dy);
+			matrix_a.at<float>(current_row, current_col + 1) = dx * (1.0 - dy);
+			matrix_a.at<float>(current_row, current_col + 2) = (1.0 - dx) * dy;
+			matrix_a.at<float>(current_row, current_col + 3) = dx * dy;
+
+			cout << "sam" << endl;
+			cout << matrix_a.at<float>(current_row, current_col + 0) << endl;
+			cout << matrix_a.at<float>(current_row, current_col + 1) << endl;
+			cout << matrix_a.at<float>(current_row, current_col + 2) << endl;
+			cout << matrix_a.at<float>(current_row, current_col + 3) << endl;
+
+			current_row++; // move to next line for next sample
+		}
+	}
+	cv::solve(matrix_a, matrix_b, result, 1); //cv::DECOMP_SVD
+	return result;
 }
 
 cv::Mat filter(cv::Mat input, cv::Mat mask)
@@ -209,10 +245,16 @@ cv::Mat thresholding(cv::Mat input, int threshold)
 	return out;
 }
 
-cv::Mat segmentation(cv::Mat input , int x_pos , int y_pos , int w , int h){
+cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h)
+{
 
-   cv::Mat input_roi = input(cv::Rect(x_pos,y_pos,w,h));
-//    cv::imwrite("ROI.bmp",input_roi);
-   return input_roi;
+	cv::Mat input_roi = input(cv::Rect(x_pos, y_pos, w, h)); //e.g function contour to cv rect
+															 // depend on w , h  , not area
+															 //    cv::Rect(x_pos,y_pos,w,h)
+															 //    cv::imwrite("ROI.bmp",input_roi);
+	return input_roi;
+}
 
+cv::Mat Contours(cv::Mat input)
+{
 }

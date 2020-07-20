@@ -68,3 +68,17 @@ image watch opencv
 
 
 #include_directories("/Users/wsli1998/Documents/ImageProcessing")
+
+四角既value 同bcd 無關   ab line同cv line無關
+
+
+*   *   *   *
+*   *   *   *
+
+
+          [0,0,0,0,0,0]
+          min square error
+          
+no need random subsampling, uniform plane fit
+
+cut 格  number排列

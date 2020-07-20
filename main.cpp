@@ -30,14 +30,21 @@ int main(int argc, char **argv)
 
 	// cv::Mat test = gray_bilinear(after_filter);
 
+
 	int num_objects = ConnectedComponents(after_filter);
+
+	cv::Mat after_planefit = single_planefit(after_filter);
+	
 
 	// cv::imshow("sample ", img);
 	// cv::imshow("mask after inverse", out_mask);
 	// cv::imshow("after filter", after_filter);
 	// cv::imshow("Bilinear Interpolation", test);
-	cv::imshow("Bilinear Interpolation2", test2);
-	cv::imshow("Bilinear Interpolation3", test3);
+	// cv::imshow("Bilinear Interpolation2", test2);
+	// cv::imshow("Bilinear Interpolation3", test3);
+
+	// cv::imshow("planefit", after_planefit);
+	// cv::imshow("after_filter", after_filter);
 
 	cv::waitKey(0);
 	cv::destroyAllWindows();
