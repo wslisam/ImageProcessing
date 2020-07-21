@@ -23,5 +23,6 @@ cv::Mat gray_bilinear_buildin(cv::Mat img, double r1 = 0.0, double r2 = 0.0);
 cv::Mat color_bilinear_buildin(cv::Mat img, double r1 = 0.0, double r2 = 0.0);
 cv::Mat single_planefit(cv::Mat img);
 cv::Mat segmentation(cv::Mat input , int x_pos , int y_pos , int w , int h);
+int Contours(cv::Mat img);
 
 #endif

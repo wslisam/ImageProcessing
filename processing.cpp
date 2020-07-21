@@ -268,6 +268,26 @@ cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h)
 	return input_roi;
 }
 
-cv::Mat Contours(cv::Mat input)
+int Contours(cv::Mat img)
 {
+
+	vector<vector<cv::Point>> contours;
+	findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::Mat output = cv::Mat::zeros(img.rows, img.cols, CV_8UC3);
+	// Check the number of objects detected
+	if (contours.size() == 0)
+	{
+		cout << "No objects detected" << endl;
+		return 0;
+	}
+	else
+	{
+		cout << "Number of objects detected: " << contours.size() << endl;
+	}
+	cv::RNG rng(0xFFFFFFFF);
+	for (int i = 0; i < contours.size(); i++)
+		cv::drawContours(output, contours, i, 0x23232323);
+	cv::imshow("Result", output);
+
+	return contours.size();
 }
