@@ -82,3 +82,5 @@ image watch opencv
 no need random subsampling, uniform plane fit
 
 cut 格  number排列
+
+uchar* data = image.ptr<uchar>(i);//get the address of row i;

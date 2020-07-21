@@ -38,12 +38,12 @@ int main(int argc, char **argv)
 
 	// cv::imshow("sample ", img);
 	// cv::imshow("mask after inverse", out_mask);
-	// cv::imshow("after filter", after_filter);
+	cv::imshow("after filter", after_filter);
 	// cv::imshow("Bilinear Interpolation", test);
 	// cv::imshow("Bilinear Interpolation2", test2);
 	// cv::imshow("Bilinear Interpolation3", test3);
 
-	// cv::imshow("planefit", after_planefit);
+	cv::imshow("planefit", after_planefit);
 	// cv::imshow("after_filter", after_filter);
 
 	cv::waitKey(0);
