@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 
 	
 
-	cv::imshow("sample ", img);
+	// cv::imshow("sample ", img);
 	// cv::imshow("mask after inverse", out_mask);
 	// cv::imshow("after filter", after_filter);
 	// cv::imshow("Bilinear Interpolation", test);

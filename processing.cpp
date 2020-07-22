@@ -270,9 +270,9 @@ cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h)
 
 int Contours(cv::Mat img)
 {
-
 	vector<vector<cv::Point>> contours;
 	findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
 	cv::Mat output = cv::Mat::zeros(img.rows, img.cols, CV_8UC3);
 	// Check the number of objects detected
 	if (contours.size() == 0)
@@ -284,9 +284,26 @@ int Contours(cv::Mat img)
 	{
 		cout << "Number of objects detected: " << contours.size() << endl;
 	}
-	cv::RNG rng(0xFFFFFFFF);
+
+	//    vector<cv::Point> ctr = contours.at(3);
+	//    for (int i = 0; i < ctr.size(); i++) {
+	//     // cv::Point coordinate_i_ofcontour = ctr.size();
+	//     cout << endl << "contour with coordinates: x = " << ctr[i].x << " y = " << ctr[i].y;
+	// }
+
 	for (int i = 0; i < contours.size(); i++)
-		cv::drawContours(output, contours, i, 0x23232323);
+	{
+		cv::Rect rect = boundingRect(contours[i]); //  次次都右至左  下至上
+		rectangle(img, rect, cv::Scalar(255, 0, 0), 0);
+		imshow("rect", img);
+	}
+	
+	// cv::RNG rng(0xFFFFFFFF);
+	for (int i = 0; i < contours.size(); i++)
+	{
+		cv::drawContours(output, contours, i, 0x0000BBBB);
+	}
+
 	cv::imshow("Result", output);
 
 	return contours.size();
