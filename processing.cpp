@@ -162,7 +162,7 @@ cv::Mat single_planefit(cv::Mat img)
 			{
 
 				dx = (x * 1.0 / width);
-				cout << "dx" << dx << endl;
+				// cout << "dx" << dx << endl;
 
 				matrix_b.at<float>(current_row, 1) = img.at<uchar>(y, x);
 				// cout<<matrix_b.at<float>(current_row, 1) <<endl;
@@ -175,24 +175,24 @@ cv::Mat single_planefit(cv::Mat img)
 				//(p00)*  *  (p10)
 				//(p01)*  *  (p11)
 
-				cout << "sasm" << endl;
-				cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 0) << endl; //00
-				cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 1) << endl; //10
-				cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 2) << endl; //01
-				cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 3) << endl; //11
+				// cout << "sasm" << endl;
+				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 0) << endl; //00
+				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 1) << endl; //10
+				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 2) << endl; //01
+				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 3) << endl; //11
 
 				current_row++; // move to next line for next sample
 			}
 		}
 	}
 	cv::solve(matrix_a, matrix_b, result, 1); //cv::DECOMP_SVD
-	cout << "result" << endl;
-	cout << result.at<float>(0, 1) << endl;
-	cout << result.at<float>(1, 1) << endl;
+	// cout << "result" << endl;
+	// cout << result.at<float>(0, 1) << endl;
+	// cout << result.at<float>(1, 1) << endl;
 
-	cout << result.at<float>(2, 1) << endl;
+	// cout << result.at<float>(2, 1) << endl;
 
-	cout << result.at<float>(3, 1) << endl;
+	// cout << result.at<float>(3, 1) << endl;
 
 	return result;
 }
@@ -271,10 +271,11 @@ cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h)
 int Contours(cv::Mat img)
 {
 	vector<vector<cv::Point>> contours;
+
 	findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	cv::Mat output = cv::Mat::zeros(img.rows, img.cols, CV_8UC3);
-	// Check the number of objects detected
+
 	if (contours.size() == 0)
 	{
 		cout << "No objects detected" << endl;
@@ -295,9 +296,15 @@ int Contours(cv::Mat img)
 	{
 		cv::Rect rect = boundingRect(contours[i]); //  次次都右至左  下至上
 		rectangle(img, rect, cv::Scalar(255, 0, 0), 0);
+		cout << " Rect " << i << endl;
+		cout << "pt 0  :" << rect.x << " , " << rect.y << endl;
+		cout << "pt 1  :" << rect.x + rect.width << " , " << rect.y << endl;
+		cout << "pt 2  :" << rect.x + rect.width << " , " << rect.y + rect.height << endl;
+		cout << "pt 3  :" << rect.x << " , " << rect.y + rect.height << endl;
+		//    cv::imwrite("ROI.bmp",input_roi);
 		imshow("rect", img);
 	}
-	
+
 	// cv::RNG rng(0xFFFFFFFF);
 	for (int i = 0; i < contours.size(); i++)
 	{
