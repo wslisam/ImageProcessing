@@ -42,11 +42,11 @@ CV\_<bit_depth>(S|U|F)C<number_of_channels>
 
 Automated Optical Inspection (AOI)
 
-
 CMake uses configuration files called CMakeLists.txt, where the compilation and
 dependency processes are defined. For a basic project, based on an executable build
 from one source code file, a two-line CMakeLists.txt file is all that is needed. The
 file looks like this:
+
 ```
 cmake_minimum_required (VERSION 2.6)
 project (CMakeTest)
@@ -62,25 +62,73 @@ The last line creates an executable command (add_executable()) in the main.cpp
 file, gives it the same name as our project (${PROJECT_NAME}), and compiles our
 source code into an executable called CMakeTest, which we set as the project name.
 The ${} expression allows access to any variable defined in our environment.
-Then, we can use the ${PROJECT_NAME} variable as an executable output name.
+Then, we can use the \${PROJECT_NAME} variable as an executable output name.
 
 image watch opencv
 
-
 #include_directories("/Users/wsli1998/Documents/ImageProcessing")
 
-四角既value 同bcd 無關   ab line同cv line無關
+四角既 value 同 bcd 無關 ab line 同 cv line 無關
 
+---
 
-*   *   *   *
-*   *   *   *
-
+---
 
           [0,0,0,0,0,0]
           min square error
-          
+
 no need random subsampling, uniform plane fit
 
-cut 格  number排列
+cut 格 number 排列
 
-uchar* data = image.ptr<uchar>(i);//get the address of row i;
+uchar\* data = image.ptr<uchar>(i);//get the address of row i;
+
+shift command 4 get the coord
+
+```cpp
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+
+using namespace cv;
+
+int main()
+{
+
+    Mat src = Mat::zeros( 400, 400, CV_8UC3);
+
+    Rect r(100,100,50,50);
+
+    Point point0 = Point(r.x, r.y);
+    Point point1 = Point(r.x + r.width, r.y);
+    Point point2 = Point(r.x + r.width, r.y + r.height);
+    Point point3 = Point(r.x, r.y + r.height);
+
+    rectangle( src, r, Scalar::all(255));
+
+    circle( src, point0, 10, Scalar( 0, 0, 255) );
+    circle( src, point1, 10, Scalar( 0, 0, 255) );
+    circle( src, point2, 10, Scalar( 0, 0, 255) );
+    circle( src, point3, 10, Scalar( 0, 0, 255) );
+
+    imshow( "coodinates of all corner of rectangle", src );
+    waitKey();
+
+    return 0;
+}
+```
+
+```cpp
+// 定義外接矩形 std::vector<Rect> boundRect(contours.size()); for (int i =0;i<contours.size();i++) { // 獲取最小外接矩形 boundRect[i] = boundingRect(contours[i]); // 在原圖像上繪製最小外接矩形 rectangle(src, boundRect[i], Scalar(0, 255, 0)); }
+
+```
+
+```cpp
+cv::Rect rect = boundingRect(contours[i]); //  次次都右至左  下至上
+rectangle(img, rect, cv::Scalar(255, 0, 0), 0);
+cout << " Rect " << i << endl;
+cout << "pt 0  :" << rect.x << " , " << rect.y << endl;
+cout << "pt 1  :" << rect.x + rect.width << " , " << rect.y << endl;
+cout << "pt 2  :" << rect.x + rect.width << " , " << rect.y + rect.height << endl;
+cout << "pt 3  :" << rect.x << " , " << rect.y + rect.height << endl;
+        cv::imwrite("ROI.bmp",input_roi);
+```

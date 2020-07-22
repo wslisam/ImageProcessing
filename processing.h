@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 #include <math.h>
 #include <complex>
+#include <vector>
 
 using namespace std;
 // using namespace cv;
