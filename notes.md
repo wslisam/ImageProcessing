@@ -132,3 +132,16 @@ cout << "pt 2  :" << rect.x + rect.width << " , " << rect.y + rect.height << end
 cout << "pt 3  :" << rect.x << " , " << rect.y + rect.height << endl;
         cv::imwrite("ROI.bmp",input_roi);
 ```
+
+
+```cpp
+void rect_contours(cv::Mat img, vector<vector<cv::Point>> contours)
+{
+
+	//    vector<cv::Point> ctr = contours.at(3);
+	//    for (int i = 0; i < ctr.size(); i++) {
+	//     // cv::Point coordinate_i_ofcontour = ctr.size();
+	//     cout << endl << "contour with coordinates: x = " << ctr[i].x << " y = " << ctr[i].y;
+	// }
+}
+```

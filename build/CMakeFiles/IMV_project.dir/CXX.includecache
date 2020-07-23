@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+/Users/wsli1998/Documents/ImageProcessing/main.cpp
+processing.h
+/Users/wsli1998/Documents/ImageProcessing/processing.h
+
 /Users/wsli1998/Documents/ImageProcessing/processing.cpp
 processing.h
 /Users/wsli1998/Documents/ImageProcessing/processing.h
@@ -22,6 +26,8 @@ opencv2/opencv.hpp
 math.h
 -
 complex
+-
+vector
 -
 
 /usr/local/Cellar/opencv/4.3.0_5/include/opencv4/opencv2/calib3d.hpp

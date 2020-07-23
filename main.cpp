@@ -5,7 +5,7 @@ int main(int argc, char **argv)
 
 	// cv::Mat img = cv::imread("./Surface_Fitting_image/colorplane/test.bmp");
 	// cv::Mat mask = cv::imread("./Surface_Fitting_image/colorplane/mask.bmp");
-		cv::Mat img = cv::imread("./Surface_Fitting_image/1/input3.bmp");
+	cv::Mat img = cv::imread("./Surface_Fitting_image/1/input3.bmp");
 	cv::Mat mask = cv::imread("./Surface_Fitting_image/1/mask.bmp");
 
 	cv::Mat fit_img;
@@ -17,6 +17,8 @@ int main(int argc, char **argv)
 	}
 	// cv::Mat test2 = color_bilinear(img);
 	// cv::Mat test3 = color_bilinear_buildin(img);
+	// cv::imshow("Bilinear Interpolation2", test2);
+	// cv::imshow("Bilinear Interpolation3", test3);
 
 	//change the img to grayscale first
 	img = BGR2GRAY(img);
@@ -30,29 +32,19 @@ int main(int argc, char **argv)
 
 	cv::Mat after_filter = filter(img, out_mask);
 
-	// cv::Mat test = gray_bilinear(after_filter);
+	// int num_objects = find_num_obj_using_ConnectedComponents(after_filter);
+	int num_objects = find_num_obj_using_contours(after_filter);
 
-
-	// int num_objects = ConnectedComponents(after_filter);
-
-	// cv::Mat after_planefit = single_planefit(after_filter);
-	// int num_objects = ConnectedComponents(after_filter);
-	int num_objects = Contours(after_filter);
-
-
-	cv::Mat after_planefit = single_planefit(img);
-
-	
+	cv::Mat after_planefit = single_planefit(after_filter, out_mask);
 
 	// cv::imshow("sample ", img);
 	// cv::imshow("mask after inverse", out_mask);
 	// cv::imshow("after filter", after_filter);
+
+	// cv::Mat test = gray_bilinear(after_filter);
 	// cv::imshow("Bilinear Interpolation", test);
-	// cv::imshow("Bilinear Interpolation2", test2);
-	// cv::imshow("Bilinear Interpolation3", test3);
 
 	cv::imshow("planefit", after_planefit);
-
 
 	cv::waitKey(0);
 	cv::destroyAllWindows();

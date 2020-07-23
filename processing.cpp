@@ -13,7 +13,7 @@ bool light_diff(int current, int last)
 	return false;
 }
 
-int ConnectedComponents(cv::Mat img)
+int find_num_obj_using_ConnectedComponents(cv::Mat img)
 {
 	// Use connected components to divide our possibles parts of images
 	cv::Mat labels;
@@ -139,64 +139,6 @@ cv::Mat gray_bilinear(cv::Mat img)
 	return out;
 }
 
-cv::Mat single_planefit(cv::Mat img)
-{
-	int height = img.rows;
-	int width = img.cols;
-	int num_of_sample = 9 * 7;
-	cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
-	cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
-	cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
-
-	int current_row = 0;
-	int current_col = 0;
-	double dx, dy;
-
-	for (int y = 0 + 1; y < height - 1; y += 50)
-	{
-		dy = (y * 1.0 / height);
-
-		for (int x = 0 + 1; x < width - 1; x += 200)
-		{
-			if (img.at<uchar>(y, x) != 0)
-			{
-
-				dx = (x * 1.0 / width);
-				// cout << "dx" << dx << endl;
-
-				matrix_b.at<float>(current_row, 1) = img.at<uchar>(y, x);
-				// cout<<matrix_b.at<float>(current_row, 1) <<endl;
-
-				matrix_a.at<float>(current_row, current_col + 0) = (1.0 - dx) * dy;			//00
-				matrix_a.at<float>(current_row, current_col + 1) = dx * dy;					//10
-				matrix_a.at<float>(current_row, current_col + 2) = (1.0 - dx) * (1.0 - dy); //01
-				matrix_a.at<float>(current_row, current_col + 3) = dx * (1.0 - dy);			//11
-
-				//(p00)*  *  (p10)
-				//(p01)*  *  (p11)
-
-				// cout << "sasm" << endl;
-				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 0) << endl; //00
-				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 1) << endl; //10
-				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 2) << endl; //01
-				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 3) << endl; //11
-
-				current_row++; // move to next line for next sample
-			}
-		}
-	}
-	cv::solve(matrix_a, matrix_b, result, 1); //cv::DECOMP_SVD
-	// cout << "result" << endl;
-	// cout << result.at<float>(0, 1) << endl;
-	// cout << result.at<float>(1, 1) << endl;
-
-	// cout << result.at<float>(2, 1) << endl;
-
-	// cout << result.at<float>(3, 1) << endl;
-
-	return result;
-}
-
 cv::Mat filter(cv::Mat input, cv::Mat mask)
 {
 	cv::Mat out;
@@ -268,7 +210,28 @@ cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h)
 	return input_roi;
 }
 
-int Contours(cv::Mat img)
+void rect_contours(cv::Mat img, vector<vector<cv::Point>> contours)
+{
+	vector<cv::Rect> boundRect(contours.size());
+	//  0    1
+	//  2    3
+	for (int i = 0; i < contours.size(); i++)
+	{
+		boundRect[i] = boundingRect(contours[i]); //  次次都右至左  下至上
+
+		rectangle(img, boundRect[i], cv::Scalar(255, 0, 255));
+
+		cout << "Rect " << i << endl;
+		cout << "Point 0  :" << boundRect[i].x << " , " << boundRect[i].y << endl;
+		cout << "Point 1  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y << endl;
+		cout << "Point 2  :" << boundRect[i].x << " , " << boundRect[i].y + boundRect[i].height << endl;
+		cout << "Point 3  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y + boundRect[i].height << endl;
+
+		imshow("rect", img);
+	}
+}
+
+int find_num_obj_using_contours(cv::Mat img)
 {
 	vector<vector<cv::Point>> contours;
 
@@ -286,32 +249,10 @@ int Contours(cv::Mat img)
 		cout << "Number of objects detected: " << contours.size() << endl;
 	}
 
-	//    vector<cv::Point> ctr = contours.at(3);
-	//    for (int i = 0; i < ctr.size(); i++) {
-	//     // cv::Point coordinate_i_ofcontour = ctr.size();
-	//     cout << endl << "contour with coordinates: x = " << ctr[i].x << " y = " << ctr[i].y;
-	// }
-
-	vector<cv::Rect> boundRect(contours.size());
-	//01
-	//23
-
-	for (int i = 0; i < contours.size(); i++)
-	{
-		boundRect[i] = boundingRect(contours[i]); //  次次都右至左  下至上
-
-		rectangle(img, boundRect[i], cv::Scalar(255, 0, 255));
-
-		cout << "Rect " << i << endl;
-		cout << "Point 0  :" << boundRect[i].x << " , " << boundRect[i].y << endl;
-		cout << "Point 1  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y << endl;
-		cout << "Point 2  :" << boundRect[i].x << " , " << boundRect[i].y + boundRect[i].height << endl;
-		cout << "Point 3  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y + boundRect[i].height << endl;
-
-		imshow("rect", img);
-	}
+	rect_contours(img, contours);
 
 	// cv::RNG rng(0xFFFFFFFF);
+	//label the contours
 	for (int i = 0; i < contours.size(); i++)
 	{
 		cv::drawContours(output, contours, i, 0x0000BBBB);
@@ -320,4 +261,75 @@ int Contours(cv::Mat img)
 	cv::imshow("Contours Result", output);
 
 	return contours.size();
+}
+
+cv::Mat single_planefit(cv::Mat img, cv::Mat mask)
+{
+	int height = img.rows;
+	int width = img.cols;
+	// int num_of_sample = (height/50+1) * (width/50+1);
+
+	int num_of_sample = 0;
+	for (int y = 0 + 1; y < height - 1; y += 50)
+	{
+		for (int x = 0 + 1; x < width - 1; x += 50)
+		{
+			if (mask.at<uchar>(y, x) != 0)
+			{
+				num_of_sample++;
+			}
+		}
+	}
+
+	cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
+	cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
+	cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
+
+	int current_row = 0;
+	int current_col = 0;
+	double dx, dy;
+
+	for (int y = 0 + 1; y < height - 1; y += 50)
+	{
+		dy = (y * 1.0 / height);
+
+		for (int x = 0 + 1; x < width - 1; x += 50)
+		{
+			if (mask.at<uchar>(y, x) != 0)
+			{
+
+				dx = (x * 1.0 / width);
+				// cout << "dx" << dx << endl;
+
+				matrix_b.at<float>(current_row, 1) = img.at<uchar>(y, x);
+				// cout<<matrix_b.at<float>(current_row, 1) <<endl;
+
+				matrix_a.at<float>(current_row, current_col + 0) = (1.0 - dx) * dy;			//00
+				matrix_a.at<float>(current_row, current_col + 1) = dx * dy;					//10
+				matrix_a.at<float>(current_row, current_col + 2) = (1.0 - dx) * (1.0 - dy); //01
+				matrix_a.at<float>(current_row, current_col + 3) = dx * (1.0 - dy);			//11
+
+				//(p00)*  *  (p10)
+				//(p01)*  *  (p11)
+
+				// cout << "sasm" << endl;
+				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 0) << endl; //00
+				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 1) << endl; //10
+				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 2) << endl; //01
+				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 3) << endl; //11
+
+				current_row++; // move to next line for next sample
+			}
+		}
+	}
+	cv::solve(matrix_a, matrix_b, result, 1); //cv::DECOMP_SVD
+	cout << "result" << endl;
+	cout << result.at<float>(0, 1) << endl;
+	cout << result.at<float>(1, 1) << endl;
+
+	cout << result.at<float>(2, 1) << endl;
+
+	cout << result.at<float>(3, 1) << endl;
+
+	return result;
 }
