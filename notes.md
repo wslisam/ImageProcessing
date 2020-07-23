@@ -152,3 +152,24 @@ cout << "Point 1  :" << boundRect[i].x + boundRect[i].width << " , " << boundRec
 cout << "Point 2  :" << boundRect[i].x << " , " << boundRect[i].y + boundRect[i].height << endl;
 cout << "Point 3  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y + boundRect[i].height << endl;
 ```
+
+
+```cpp
+matrix_b.at<float>(current_row, 1) = img.at<uchar>(y, x);
+// cout<<matrix_b.at<float>(current_row, 1) <<endl;
+
+matrix_a.at<float>(current_row, current_col + 0) = (1.0 - dx) * dy;			//00
+matrix_a.at<float>(current_row, current_col + 1) = dx * dy;					//10
+matrix_a.at<float>(current_row, current_col + 2) = (1.0 - dx) * (1.0 - dy); //01
+matrix_a.at<float>(current_row, current_col + 3) = dx * (1.0 - dy);			//11
+
+//(p00)*  *  (p10)
+//(p01)*  *  (p11)
+
+// cout << "sasm" << endl;
+// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 0) << endl; //00
+// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 1) << endl; //10
+// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 2) << endl; //01
+// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 3) << endl; //11
+current_row++; // move to next line for next sample
+```

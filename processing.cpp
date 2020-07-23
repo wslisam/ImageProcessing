@@ -235,7 +235,7 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
 		{
 			cout << "Point " << j << " :" << coord[i][j].first << " " << coord[i][j].second << endl;
 		}
-		cout<<endl;
+		cout << endl;
 	}
 	return coord;
 }
@@ -272,73 +272,91 @@ int find_num_obj_using_contours(cv::Mat img)
 	return contours.size();
 }
 
-cv::Mat single_planefit(cv::Mat img, cv::Mat mask)
+cv::Mat single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
 {
 	int height = img.rows;
 	int width = img.cols;
-	// int num_of_sample = (height/50+1) * (width/50+1);
-
 	int num_of_sample = 0;
-	for (int y = 0 + 1; y < height - 1; y += 50)
+
+	vector<vector<cv::Point>> contours;
+	findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	vector<vector<pair<int, int>>> rect_coord = rect_contours(img, contours);
+
+	vector<int> M_B;
+	vector<vector<float>> M_A;
+	float dx, dy;
+
+	for (int y = 0 + 1; y < height - 1; y += Grid_size)
 	{
-		for (int x = 0 + 1; x < width - 1; x += 50)
+		dy = (y * 1.0 / height);
+
+		for (int x = 0 + 1; x < width - 1; x += Grid_size)
 		{
 			if (mask.at<uchar>(y, x) != 0)
 			{
+				dx = (x * 1.0 / width);
+
+				M_B.push_back((int)img.at<uchar>(y, x));
+				cout << M_B[num_of_sample] << endl;
+
+				vector<float> temp_row;
+				// M_A[num_of_sample].resize(4);
+
+				temp_row.push_back((1.0 - dx) * dy);		 //00
+				temp_row.push_back(dx * dy);				 //10
+				temp_row.push_back((1.0 - dx) * (1.0 - dy)); //01
+				temp_row.push_back(dx * (1.0 - dy));		 //11
+				M_A.push_back(temp_row);
+
+				//Print the value in M_A
+				// cout << "value" << endl;
+				// cout << M_A[num_of_sample][0] << endl;
+				// cout << M_A[num_of_sample][1] << endl;
+				// cout << M_A[num_of_sample][2] << endl;
+				// cout << M_A[num_of_sample][3] << endl;
+
 				num_of_sample++;
 			}
 		}
 	}
 
+	// cout << "num" << num_of_sample << endl;
+
 	cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
 	cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
 	cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
 
-	int current_row = 0;
-	int current_col = 0;
-	double dx, dy;
+	// matrix_b = cv::Mat(M_B).reshape(1, num_of_sample);
 
-	for (int y = 0 + 1; y < height - 1; y += 50)
+	for (int f = 0; f < num_of_sample; f++)
 	{
-		dy = (y * 1.0 / height);
 
-		for (int x = 0 + 1; x < width - 1; x += 50)
-		{
-			if (mask.at<uchar>(y, x) != 0)
-			{
-
-				dx = (x * 1.0 / width);
-				// cout << "dx" << dx << endl;
-
-				matrix_b.at<float>(current_row, 1) = img.at<uchar>(y, x);
-				// cout<<matrix_b.at<float>(current_row, 1) <<endl;
-
-				matrix_a.at<float>(current_row, current_col + 0) = (1.0 - dx) * dy;			//00
-				matrix_a.at<float>(current_row, current_col + 1) = dx * dy;					//10
-				matrix_a.at<float>(current_row, current_col + 2) = (1.0 - dx) * (1.0 - dy); //01
-				matrix_a.at<float>(current_row, current_col + 3) = dx * (1.0 - dy);			//11
-
-				//(p00)*  *  (p10)
-				//(p01)*  *  (p11)
-
-				// cout << "sasm" << endl;
-				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 0) << endl; //00
-				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 1) << endl; //10
-				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 2) << endl; //01
-				// cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 3) << endl; //11
-
-				current_row++; // move to next line for next sample
-			}
-		}
+		matrix_b.at<float>(f, 1) = M_B[f];
 	}
-	cv::solve(matrix_a, matrix_b, result, 1); //cv::DECOMP_SVD
+
+	// matrix_a = cv::Mat(M_A).reshape(1, num_of_sample);
+
+	for (int current_row = 0; current_row < num_of_sample; current_row++)
+	{
+		matrix_a.at<float>(current_row, 0) = M_A[current_row][0];
+		matrix_a.at<float>(current_row, 1) = M_A[current_row][1];
+		matrix_a.at<float>(current_row, 2) = M_A[current_row][2];
+		matrix_a.at<float>(current_row, 3) = M_A[current_row][3];
+	}
+
+	// check the src type
+	// cout<< typeid(matrix_b).name()<<endl;
+	// cout<< typeid(matrix_a).name()<<endl;
+	// cout<< typeid(result).name()<<endl;
+	// cout<<(matrix_a.type()==CV_32F)<<endl;
+
+	cv::solve(matrix_a, matrix_b, result, 1); // cv::DECOMP_SVD
+
 	cout << "result" << endl;
-	cout << result.at<float>(0, 1) << endl;
-	cout << result.at<float>(1, 1) << endl;
-
-	cout << result.at<float>(2, 1) << endl;
-
-	cout << result.at<float>(3, 1) << endl;
+	for (int n = 0; n <= 3; n++)
+	{
+		cout << result.at<float>(n, 1) << endl;
+	}
 
 	return result;
 }

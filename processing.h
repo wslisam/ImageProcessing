@@ -8,6 +8,7 @@
 #include <math.h>
 #include <complex>
 #include <vector>
+#include <typeinfo>
 
 using namespace std;
 // using namespace cv;
@@ -22,8 +23,8 @@ cv::Mat gray_bilinear(cv::Mat img);
 cv::Mat color_bilinear(cv::Mat img, double rx = 1, double ry = 1);
 cv::Mat gray_bilinear_buildin(cv::Mat img, double r1 = 0.0, double r2 = 0.0);
 cv::Mat color_bilinear_buildin(cv::Mat img, double r1 = 0.0, double r2 = 0.0);
-cv::Mat single_planefit(cv::Mat img, cv::Mat mask);
+cv::Mat single_planefit(cv::Mat img, cv::Mat mask, int Grid_size);
 cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h);
-vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Point>>  contours);
+vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Point>> contours);
 
 #endif

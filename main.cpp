@@ -33,12 +33,12 @@ int main(int argc, char **argv)
 	cv::Mat after_filter = filter(img, out_mask);
 
 	// int num_objects = find_num_obj_using_ConnectedComponents(after_filter);
-	int num_objects = find_num_obj_using_contours(after_filter);
+	// int num_objects = find_num_obj_using_contours(after_filter);
 
-	cv::Mat after_planefit = single_planefit(after_filter, out_mask);
+	cv::Mat after_planefit = single_planefit(after_filter, out_mask,50);
 
 	// cv::imshow("sample ", img);
-	cv::imshow("mask after inverse", out_mask);
+	// cv::imshow("mask after inverse", out_mask);
 	// cv::imshow("after filter", after_filter);
 
 	// cv::Mat test = gray_bilinear(after_filter);
