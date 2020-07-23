@@ -133,7 +133,6 @@ cout << "pt 3  :" << rect.x << " , " << rect.y + rect.height << endl;
         cv::imwrite("ROI.bmp",input_roi);
 ```
 
-
 ```cpp
 void rect_contours(cv::Mat img, vector<vector<cv::Point>> contours)
 {
@@ -144,4 +143,12 @@ void rect_contours(cv::Mat img, vector<vector<cv::Point>> contours)
 	//     cout << endl << "contour with coordinates: x = " << ctr[i].x << " y = " << ctr[i].y;
 	// }
 }
+```
+
+```cpp
+cout << "Rect " << i << endl;
+cout << "Point 0  :" << boundRect[i].x << " , " << boundRect[i].y << endl;
+cout << "Point 1  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y << endl;
+cout << "Point 2  :" << boundRect[i].x << " , " << boundRect[i].y + boundRect[i].height << endl;
+cout << "Point 3  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y + boundRect[i].height << endl;
 ```

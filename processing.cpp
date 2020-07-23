@@ -210,25 +210,34 @@ cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h)
 	return input_roi;
 }
 
-void rect_contours(cv::Mat img, vector<vector<cv::Point>> contours)
+vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Point>> contours)
 {
 	vector<cv::Rect> boundRect(contours.size());
 	//  0    1
 	//  2    3
+	vector<vector<pair<int, int>>> coord(contours.size());
+
 	for (int i = 0; i < contours.size(); i++)
 	{
 		boundRect[i] = boundingRect(contours[i]); //  次次都右至左  下至上
 
 		rectangle(img, boundRect[i], cv::Scalar(255, 0, 255));
 
-		cout << "Rect " << i << endl;
-		cout << "Point 0  :" << boundRect[i].x << " , " << boundRect[i].y << endl;
-		cout << "Point 1  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y << endl;
-		cout << "Point 2  :" << boundRect[i].x << " , " << boundRect[i].y + boundRect[i].height << endl;
-		cout << "Point 3  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y + boundRect[i].height << endl;
+		imshow("Rect", img);
 
-		imshow("rect", img);
+		cout << "Rect " << i << endl;
+
+		coord[i].push_back(make_pair(boundRect[i].x, boundRect[i].y));
+		coord[i].push_back(make_pair(boundRect[i].x + boundRect[i].width, boundRect[i].y));
+		coord[i].push_back(make_pair(boundRect[i].x, boundRect[i].y + boundRect[i].height));
+		coord[i].push_back(make_pair(boundRect[i].x + boundRect[i].width, boundRect[i].y + boundRect[i].height));
+		for (int j = 0; j <= 3; j++)
+		{
+			cout << "Point " << j << " :" << coord[i][j].first << " " << coord[i][j].second << endl;
+		}
+		cout<<endl;
 	}
+	return coord;
 }
 
 int find_num_obj_using_contours(cv::Mat img)
