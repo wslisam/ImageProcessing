@@ -153,7 +153,6 @@ cout << "Point 2  :" << boundRect[i].x << " , " << boundRect[i].y + boundRect[i]
 cout << "Point 3  :" << boundRect[i].x + boundRect[i].width << " , " << boundRect[i].y + boundRect[i].height << endl;
 ```
 
-
 ```cpp
 matrix_b.at<float>(current_row, 1) = img.at<uchar>(y, x);
 // cout<<matrix_b.at<float>(current_row, 1) <<endl;
@@ -172,4 +171,41 @@ matrix_a.at<float>(current_row, current_col + 3) = dx * (1.0 - dy);			//11
 // cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 2) << endl; //01
 // cout << setprecision(2) << matrix_a.at<float>(current_row, current_col + 3) << endl; //11
 current_row++; // move to next line for next sample
+```
+
+```cpp
+for (int y = 0 + 1; y < height - 1; y += Grid_size)
+	{
+		dy = (y * 1.0 / height);
+
+		for (int x = 0 + 1; x < width - 1; x += Grid_size)
+		{
+			if (mask.at<uchar>(y, x) != 0)
+			{
+				dx = (x * 1.0 / width);
+
+				M_B.push_back((int)img.at<uchar>(y, x));
+				cout << M_B[num_of_sample] << endl;
+
+				vector<float> temp_row;
+				// M_A[num_of_sample].resize(4);
+
+				temp_row.push_back((1.0 - dx) * dy);		 //00
+				temp_row.push_back(dx * dy);				 //10
+				temp_row.push_back((1.0 - dx) * (1.0 - dy)); //01
+				temp_row.push_back(dx * (1.0 - dy));		 //11
+				M_A.push_back(temp_row);
+
+				//Print the value in M_A
+				// cout << "value" << endl;
+				// cout << M_A[num_of_sample][0] << endl;
+				// cout << M_A[num_of_sample][1] << endl;
+				// cout << M_A[num_of_sample][2] << endl;
+				// cout << M_A[num_of_sample][3] << endl;
+
+				num_of_sample++;
+			}
+		}
+	}
+
 ```

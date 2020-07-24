@@ -213,8 +213,8 @@ cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h)
 vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Point>> contours)
 {
 	vector<cv::Rect> boundRect(contours.size());
-	//  0    1
-	//  2    3
+	//  0    1   00  10
+	//  2    3   01  11
 	vector<vector<pair<int, int>>> coord(contours.size());
 
 	for (int i = 0; i < contours.size(); i++)
@@ -227,12 +227,12 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
 
 		cout << "Rect " << i << endl;
 
-		coord[i].push_back(make_pair(boundRect[i].x, boundRect[i].y));
+		coord[i].push_back(make_pair(boundRect[i].x                     , boundRect[i].y));
 		coord[i].push_back(make_pair(boundRect[i].x + boundRect[i].width, boundRect[i].y));
-		coord[i].push_back(make_pair(boundRect[i].x, boundRect[i].y + boundRect[i].height));
+		coord[i].push_back(make_pair(boundRect[i].                      , boundRect[i].y + boundRect[i].height));
 		coord[i].push_back(make_pair(boundRect[i].x + boundRect[i].width, boundRect[i].y + boundRect[i].height));
 		for (int j = 0; j <= 3; j++)
-		{
+		{                             //    X                                 Y
 			cout << "Point " << j << " :" << coord[i][j].first << " " << coord[i][j].second << endl;
 		}
 		cout << endl;
@@ -272,91 +272,146 @@ int find_num_obj_using_contours(cv::Mat img)
 	return contours.size();
 }
 
-cv::Mat single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
+int single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
 {
 	int height = img.rows;
 	int width = img.cols;
-	int num_of_sample = 0;
 
 	vector<vector<cv::Point>> contours;
 	findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	vector<vector<pair<int, int>>> rect_coord = rect_contours(img, contours);
 
-	vector<int> M_B;
-	vector<vector<float>> M_A;
+	int num_of_sample[contours.size()];
+	int num_of_region = contours.size();
+
+	vector<vector<vector<int>>> M_B;
+	vector<vector<vector<float>>> M_A;
 	float dx, dy;
+	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
+	int pixel_val;
 
-	for (int y = 0 + 1; y < height - 1; y += Grid_size)
+	for (int seg = 0; seg < num_of_region; seg++) // seg = region index
 	{
-		dy = (y * 1.0 / height);
+		y_0 = rect_coord[seg][0].second;
+		y_1 = rect_coord[seg][2].second;
+		num_of_sample[seg] = 0;
 
-		for (int x = 0 + 1; x < width - 1; x += Grid_size)
+		for (int y = y_0 + 1; y < y_1; y += Grid_size)  // size can the same
 		{
-			if (mask.at<uchar>(y, x) != 0)
-			{
-				dx = (x * 1.0 / width);
 
-				M_B.push_back((int)img.at<uchar>(y, x));
-				cout << M_B[num_of_sample] << endl;
+			dy = ((y - y_0) / (y_1 - y_0 * 1.0));
 
-				vector<float> temp_row;
-				// M_A[num_of_sample].resize(4);
+			x_0 = rect_coord[seg][0].first;
+			x_1 = rect_coord[seg][1].first;
 
-				temp_row.push_back((1.0 - dx) * dy);		 //00
-				temp_row.push_back(dx * dy);				 //10
-				temp_row.push_back((1.0 - dx) * (1.0 - dy)); //01
-				temp_row.push_back(dx * (1.0 - dy));		 //11
-				M_A.push_back(temp_row);
+			for (int x = x_0 + 1; x < x_1; x += Grid_size)
+			{ // rect seg  point 0
+				dx = ((x - x_0) / (x_1 - x_0 * 1.0));
 
-				//Print the value in M_A
-				// cout << "value" << endl;
-				// cout << M_A[num_of_sample][0] << endl;
-				// cout << M_A[num_of_sample][1] << endl;
-				// cout << M_A[num_of_sample][2] << endl;
-				// cout << M_A[num_of_sample][3] << endl;
+				if (mask.at<uchar>(y, x) != 0)
+				{
+					pixel_val = img.at<uchar>(y, x);
+					// ver1
+					// M_B.at(seg).at(num_of_sample[seg]) = pixel_val;
+					//   cout<<M_B[seg].at(num_of_sample[seg])<<endl;
+					// cout<<M_B.at(seg).at(num_of_sample[seg])<<endl;
 
-				num_of_sample++;
+					// ver2
+					// vector<int> V;
+					// V.push_back(pixel_val);
+					// M_B.at(seg).push_back(V);
+					// M_B.push_back(M_B[seg]);
+
+					// ver3
+					// M_B.at(seg).push_back(pixel_val);
+					// M_B.push_back(M_B.at(seg));
+    
+					M_B.push_back(vector<vector<int>>());
+					M_B.at(seg).push_back(vector<int>());
+					M_B.at(seg)[num_of_sample[seg]].push_back(pixel_val);
+					// M_B.push_back(M_B[seg]);
+
+					vector<float> temp_row;
+					M_A.push_back(vector<vector<float>>());
+					// M_A.at(seg).push_back(vector<float>());
+					temp_row.push_back((1.0 - dx) * dy);		 //00
+					temp_row.push_back(dx * dy);				 //10
+					temp_row.push_back((1.0 - dx) * (1.0 - dy)); //01
+					temp_row.push_back(dx * (1.0 - dy));		 //11
+					M_A[seg].push_back(temp_row);
+
+					(num_of_sample[seg])++;
+				}
 			}
 		}
 	}
 
-	// cout << "num" << num_of_sample << endl;
+	// for (vector<vector<vector<float>>>::const_iterator i = M_A.begin(); i != M_A.end(); ++i)
+	// 				{
+	// 					for (vector<vector<float>>::const_iterator j = i->begin(); j != i->end(); ++j)
+	// 					{
+	// 						for (vector<float>::const_iterator k = j->begin(); k != j->end(); ++k)
+	// 						{
+	// 							cout << *k << ' '<<endl;
+	// 						}
+	// 					}
+	// 				}
 
-	cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
-	cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
-	cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
+	// cout << "num" << num_of_sample[0] << endl;
 
-	// matrix_b = cv::Mat(M_B).reshape(1, num_of_sample);
+	// cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
+	// cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
+	// cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
 
-	for (int f = 0; f < num_of_sample; f++)
-	{
+	vector<cv::Mat> result[num_of_region];
+	vector<cv::Mat> matrix_a[num_of_region];
+	vector<cv::Mat> matrix_b[num_of_region];
 
-		matrix_b.at<float>(f, 1) = M_B[f];
+	for (int seg = 0; seg < contours.size(); seg++)
+	{ //圖入黎,seg唔seg ,／ 直斬，每一份掉入去一個reg ,掉function cut格
+
+		result->push_back(cv::Mat::zeros(4, 1, CV_32FC1));
+		matrix_a->push_back(cv::Mat::zeros(num_of_sample[seg], 4, CV_32FC1));
+		matrix_b->push_back(cv::Mat::zeros(num_of_sample[seg], 1, CV_32FC1));
+		for (int f = 0; f < num_of_sample[seg]; f++)
+		{
+		
+			// matrix_b[seg].at<float>(f, 1) = M_B[seg][f] << endl;
+			// matrix_b.at(seg).at<float>(f, 1).push_back(M_B[seg][f]);
+			
+			// matrix_b.at(seg).at<float>(f, 1).push_back(M_B.at(seg)[num_of_sample[seg]]);
+			// matrix_b.at(seg).push_back(M_B.at(seg)[num_of_sample[seg]]);
+
+
+		}
+
+		// matrix_a = cv::Mat(M_A).reshape(1, num_of_sample[seg]);
+
+		// for (int current_row = 0; current_row < num_of_sample[seg]; current_row++)
+		// {
+		// 	matrix_a[seg][current_row].at<float>(current_row, 0) = M_A[seg][current_row][0];
+		// 	matrix_a[seg][current_row].at<float>(current_row, 1) = M_A[seg][current_row][1];
+		// 	matrix_a[seg][current_row].at<float>(current_row, 2) = M_A[seg][current_row][2];
+		// 	matrix_a[seg][current_row].at<float>(current_row, 3) = M_A[seg][current_row][3];
+		// }
+
+		// check the src type
+		// 		cout
+		// 	<< typeid(matrix_b).name() << endl;
+		// cout << typeid(matrix_a).name() << endl;
+		// cout << typeid(result).name() << endl;
+		// cout << (matrix_a.type() == CV_32F) << endl;
+
+		// cv::solve(matrix_a[seg], matrix_b[seg], result[seg], cv::DECOMP_SVD);
+
+		// cout << "result" << endl;
+		// for (int n = 0; n <= 3; n++)
+		// {
+		// 	cout << result[seg][n].at<float>(n, 1) << endl;
+		// }
 	}
 
-	// matrix_a = cv::Mat(M_A).reshape(1, num_of_sample);
-
-	for (int current_row = 0; current_row < num_of_sample; current_row++)
-	{
-		matrix_a.at<float>(current_row, 0) = M_A[current_row][0];
-		matrix_a.at<float>(current_row, 1) = M_A[current_row][1];
-		matrix_a.at<float>(current_row, 2) = M_A[current_row][2];
-		matrix_a.at<float>(current_row, 3) = M_A[current_row][3];
-	}
-
-	// check the src type
-	// cout<< typeid(matrix_b).name()<<endl;
-	// cout<< typeid(matrix_a).name()<<endl;
-	// cout<< typeid(result).name()<<endl;
-	// cout<<(matrix_a.type()==CV_32F)<<endl;
-
-	cv::solve(matrix_a, matrix_b, result, 1); // cv::DECOMP_SVD
-
-	cout << "result" << endl;
-	for (int n = 0; n <= 3; n++)
-	{
-		cout << result.at<float>(n, 1) << endl;
-	}
-
-	return result;
+	//    vector<cv::Mat> result;
+	// return result;
+	return 0;
 }
