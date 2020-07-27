@@ -227,3 +227,11 @@ for (int y = 0 + 1; y < height - 1; y += Grid_size)
 					// M_B.push_back(M_B.at(seg));
     
 ```
+
+```cpp
+	// check the src type
+	// cout << typeid(matrix_b).name() << endl;
+	// cout << typeid(matrix_a).name() << endl;
+	// cout << typeid(result).name() << endl;
+	// cout << (matrix_a.type() == CV_32F) << endl;
+```

@@ -47,8 +47,8 @@ cv::Mat color_bilinear_buildin(cv::Mat img, double r1 = 0.0, double r2 = 0.0);
 cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h);
 vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Point>> contours);
 
-int cal_ratio(cv::Mat img, cv::Mat mask, int Grid_size);
-void single_planefit(cv::Mat contour_region, int Grid_size, cv::Mat mask_region, vector<vector<int>> M_B, vector<vector<float>> M_A);
+int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size);
+void single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample);
 void multi_planefit(vector<vector<int>> M_B, vector<vector<float>> M_A);
 
 #endif

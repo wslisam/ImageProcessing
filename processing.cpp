@@ -229,7 +229,7 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
 
 		coord[i].push_back(make_pair(boundRect[i].x, boundRect[i].y));
 		coord[i].push_back(make_pair(boundRect[i].x + boundRect[i].width, boundRect[i].y));
-		coord[i].push_back(make_pair(boundRect[i]., boundRect[i].y + boundRect[i].height));
+		coord[i].push_back(make_pair(boundRect[i].x, boundRect[i].y + boundRect[i].height));
 		coord[i].push_back(make_pair(boundRect[i].x + boundRect[i].width, boundRect[i].y + boundRect[i].height));
 		for (int j = 0; j <= 3; j++)
 		{ //    X                                 Y
@@ -272,7 +272,7 @@ int find_num_obj_using_contours(cv::Mat img)
 	return contours.size();
 }
 
-int cal_ratio(cv::Mat img, cv::Mat mask, int Grid_size)
+int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 {
 	int height = img.rows;
 	int width = img.cols;
@@ -286,6 +286,7 @@ int cal_ratio(cv::Mat img, cv::Mat mask, int Grid_size)
 
 	vector<vector<vector<int>>> M_B;
 	vector<vector<vector<float>>> M_A;
+
 	float dx, dy;
 	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
 	int pixel_val;
@@ -298,7 +299,6 @@ int cal_ratio(cv::Mat img, cv::Mat mask, int Grid_size)
 
 		for (int y = y_0 + 1; y < y_1; y += Grid_size) // size can the same
 		{
-
 			dy = ((y - y_0) / (y_1 - y_0 * 1.0));
 
 			x_0 = rect_coord[seg][0].first;
@@ -311,15 +311,19 @@ int cal_ratio(cv::Mat img, cv::Mat mask, int Grid_size)
 				if (mask.at<uchar>(y, x) != 0)
 				{
 					pixel_val = img.at<uchar>(y, x);
+					// cout<<pixel_val<<endl;
 
 					M_B.push_back(vector<vector<int>>());
 					M_B.at(seg).push_back(vector<int>());
 					M_B.at(seg)[num_of_sample[seg]].push_back(pixel_val);
+					// cout<<M_B.at(seg)[num_of_sample[seg]][0]<<endl;
+				
 					// M_B.push_back(M_B[seg]);
 
 					vector<float> temp_row;
 					M_A.push_back(vector<vector<float>>());
 					// M_A.at(seg).push_back(vector<float>());
+
 					temp_row.push_back((1.0 - dx) * dy);		 //00
 					temp_row.push_back(dx * dy);				 //10
 					temp_row.push_back((1.0 - dx) * (1.0 - dy)); //01
@@ -330,6 +334,19 @@ int cal_ratio(cv::Mat img, cv::Mat mask, int Grid_size)
 				}
 			}
 		}
+		cv::Mat m_roi = img(cv::Rect(rect_coord[seg][0].first,
+									 rect_coord[seg][0].second,
+									 rect_coord[seg][1].first - rect_coord[seg][0].first,
+									 rect_coord[seg][2].second - rect_coord[seg][0].second));
+
+		cv::Mat mask_roi = mask(cv::Rect(rect_coord[seg][0].first,
+										 rect_coord[seg][0].second,
+										 rect_coord[seg][1].first - rect_coord[seg][0].first,
+										 rect_coord[seg][2].second - rect_coord[seg][0].second));
+
+		// cout << "num" << num_of_sample[seg] << endl;
+
+		single_planefit(m_roi, mask_roi, Grid_size, M_B[seg], M_A[seg], num_of_sample[seg]);
 	}
 
 	// for (vector<vector<vector<float>>>::const_iterator i = M_A.begin(); i != M_A.end(); ++i)
@@ -341,67 +358,43 @@ int cal_ratio(cv::Mat img, cv::Mat mask, int Grid_size)
 	// 							cout << *k << ' '<<endl;
 	// 						}
 	// 					}
-	// 				}
+	// }
 
-	// cout << "num" << num_of_sample[0] << endl;
-
-	
-	//    vector<cv::Mat> result;
-	// return result;
 	return 0;
 }
 
-void single_planefit(cv::Mat contour_region, int Grid_size, cv::Mat mask_region, vector<vector<int>> M_B, vector<vector<float>> M_A)
+void single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample)
 {
+	cv::imshow("ROI", contour_region);
+	cv::imshow("MASKROI", mask_region);
+	cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
+	cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
+	cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
 
-	// cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
-	// cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
-	// cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
+	//圖入黎,seg唔seg ,／ 直斬，每一份掉入去一個reg ,掉function cut格
 
-	vector<cv::Mat> result[num_of_region];
-	vector<cv::Mat> matrix_a[num_of_region];
-	vector<cv::Mat> matrix_b[num_of_region];
-
-	for (int seg = 0; seg < contours.size(); seg++)
-	{ //圖入黎,seg唔seg ,／ 直斬，每一份掉入去一個reg ,掉function cut格
-
-		result->push_back(cv::Mat::zeros(4, 1, CV_32FC1));
-		matrix_a->push_back(cv::Mat::zeros(num_of_sample[seg], 4, CV_32FC1));
-		matrix_b->push_back(cv::Mat::zeros(num_of_sample[seg], 1, CV_32FC1));
-		for (int f = 0; f < num_of_sample[seg]; f++)
-		{
-
-			// matrix_b[seg].at<float>(f, 1) = M_B[seg][f] << endl;
-			// matrix_b.at(seg).at<float>(f, 1).push_back(M_B[seg][f]);
-
-			// matrix_b.at(seg).at<float>(f, 1).push_back(M_B.at(seg)[num_of_sample[seg]]);
-			// matrix_b.at(seg).push_back(M_B.at(seg)[num_of_sample[seg]]);
-		}
-
-		// matrix_a = cv::Mat(M_A).reshape(1, num_of_sample[seg]);
-
-		// for (int current_row = 0; current_row < num_of_sample[seg]; current_row++)
-		// {
-		// 	matrix_a[seg][current_row].at<float>(current_row, 0) = M_A[seg][current_row][0];
-		// 	matrix_a[seg][current_row].at<float>(current_row, 1) = M_A[seg][current_row][1];
-		// 	matrix_a[seg][current_row].at<float>(current_row, 2) = M_A[seg][current_row][2];
-		// 	matrix_a[seg][current_row].at<float>(current_row, 3) = M_A[seg][current_row][3];
-		// }
-
-		// check the src type
-		// 		cout
-		// 	<< typeid(matrix_b).name() << endl;
-		// cout << typeid(matrix_a).name() << endl;
-		// cout << typeid(result).name() << endl;
-		// cout << (matrix_a.type() == CV_32F) << endl;
-
-		// cv::solve(matrix_a[seg], matrix_b[seg], result[seg], cv::DECOMP_SVD);
-
-		// cout << "result" << endl;
-		// for (int n = 0; n <= 3; n++)
-		// {
-		// 	cout << result[seg][n].at<float>(n, 1) << endl;
-		// }
+	for (int sample = 0; sample < num_of_sample; sample++)
+	{
+		matrix_b.at<float>(sample, 0) = M_B[sample][0];
+		// cout<<M_B[sample][0]<<endl;
 	}
-   return ;
+
+	for (int current_row = 0; current_row < num_of_sample; current_row++)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			matrix_a.at<float>(current_row, i) = M_A[current_row][i];
+		}
+	}
+
+	cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
+
+   	cout << "result" << endl;
+	for (int n = 0; n <= 3; n++)
+	{ 
+		cout << result.at<float>(n, 1) << endl;
+	}
+	// cv::imshow("result", result);
+
+	return;
 }
