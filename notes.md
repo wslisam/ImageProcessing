@@ -209,3 +209,21 @@ for (int y = 0 + 1; y < height - 1; y += Grid_size)
 	}
 
 ```
+
+```cpp
+	// ver1
+					// M_B.at(seg).at(num_of_sample[seg]) = pixel_val;
+					//   cout<<M_B[seg].at(num_of_sample[seg])<<endl;
+					// cout<<M_B.at(seg).at(num_of_sample[seg])<<endl;
+
+					// ver2
+					// vector<int> V;
+					// V.push_back(pixel_val);
+					// M_B.at(seg).push_back(V);
+					// M_B.push_back(M_B[seg]);
+
+					// ver3
+					// M_B.at(seg).push_back(pixel_val);
+					// M_B.push_back(M_B.at(seg));
+    
+```

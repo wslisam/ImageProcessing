@@ -227,12 +227,12 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
 
 		cout << "Rect " << i << endl;
 
-		coord[i].push_back(make_pair(boundRect[i].x                     , boundRect[i].y));
+		coord[i].push_back(make_pair(boundRect[i].x, boundRect[i].y));
 		coord[i].push_back(make_pair(boundRect[i].x + boundRect[i].width, boundRect[i].y));
-		coord[i].push_back(make_pair(boundRect[i].                      , boundRect[i].y + boundRect[i].height));
+		coord[i].push_back(make_pair(boundRect[i]., boundRect[i].y + boundRect[i].height));
 		coord[i].push_back(make_pair(boundRect[i].x + boundRect[i].width, boundRect[i].y + boundRect[i].height));
 		for (int j = 0; j <= 3; j++)
-		{                             //    X                                 Y
+		{ //    X                                 Y
 			cout << "Point " << j << " :" << coord[i][j].first << " " << coord[i][j].second << endl;
 		}
 		cout << endl;
@@ -272,7 +272,7 @@ int find_num_obj_using_contours(cv::Mat img)
 	return contours.size();
 }
 
-int single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
+int cal_ratio(cv::Mat img, cv::Mat mask, int Grid_size)
 {
 	int height = img.rows;
 	int width = img.cols;
@@ -296,7 +296,7 @@ int single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
 		y_1 = rect_coord[seg][2].second;
 		num_of_sample[seg] = 0;
 
-		for (int y = y_0 + 1; y < y_1; y += Grid_size)  // size can the same
+		for (int y = y_0 + 1; y < y_1; y += Grid_size) // size can the same
 		{
 
 			dy = ((y - y_0) / (y_1 - y_0 * 1.0));
@@ -311,21 +311,7 @@ int single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
 				if (mask.at<uchar>(y, x) != 0)
 				{
 					pixel_val = img.at<uchar>(y, x);
-					// ver1
-					// M_B.at(seg).at(num_of_sample[seg]) = pixel_val;
-					//   cout<<M_B[seg].at(num_of_sample[seg])<<endl;
-					// cout<<M_B.at(seg).at(num_of_sample[seg])<<endl;
 
-					// ver2
-					// vector<int> V;
-					// V.push_back(pixel_val);
-					// M_B.at(seg).push_back(V);
-					// M_B.push_back(M_B[seg]);
-
-					// ver3
-					// M_B.at(seg).push_back(pixel_val);
-					// M_B.push_back(M_B.at(seg));
-    
 					M_B.push_back(vector<vector<int>>());
 					M_B.at(seg).push_back(vector<int>());
 					M_B.at(seg)[num_of_sample[seg]].push_back(pixel_val);
@@ -359,6 +345,15 @@ int single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
 
 	// cout << "num" << num_of_sample[0] << endl;
 
+	
+	//    vector<cv::Mat> result;
+	// return result;
+	return 0;
+}
+
+void single_planefit(cv::Mat contour_region, int Grid_size, cv::Mat mask_region, vector<vector<int>> M_B, vector<vector<float>> M_A)
+{
+
 	// cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
 	// cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
 	// cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
@@ -375,14 +370,12 @@ int single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
 		matrix_b->push_back(cv::Mat::zeros(num_of_sample[seg], 1, CV_32FC1));
 		for (int f = 0; f < num_of_sample[seg]; f++)
 		{
-		
+
 			// matrix_b[seg].at<float>(f, 1) = M_B[seg][f] << endl;
 			// matrix_b.at(seg).at<float>(f, 1).push_back(M_B[seg][f]);
-			
+
 			// matrix_b.at(seg).at<float>(f, 1).push_back(M_B.at(seg)[num_of_sample[seg]]);
 			// matrix_b.at(seg).push_back(M_B.at(seg)[num_of_sample[seg]]);
-
-
 		}
 
 		// matrix_a = cv::Mat(M_A).reshape(1, num_of_sample[seg]);
@@ -410,8 +403,5 @@ int single_planefit(cv::Mat img, cv::Mat mask, int Grid_size)
 		// 	cout << result[seg][n].at<float>(n, 1) << endl;
 		// }
 	}
-
-	//    vector<cv::Mat> result;
-	// return result;
-	return 0;
+   return ;
 }
