@@ -352,7 +352,7 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 
 		result_rect = single_planefit(m_roi, mask_roi, Grid_size, M_B[seg], M_A[seg], num_of_sample[seg], rect_coord);
 		rect_roi = final(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second, result_rect.cols, result_rect.rows));
-		result_rect.copyTo(rect_roi, m_roi);
+		result_rect.copyTo(rect_roi, m_roi);  // mask size need to same as rect roi so only m_roi
 	}
 
 	cv::imshow("final", final);

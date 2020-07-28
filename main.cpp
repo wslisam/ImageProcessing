@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 	// int num_objects = find_num_obj_using_ConnectedComponents(after_filter);
 	int num_objects = find_num_obj_using_contours(after_filter);
 
-	int after_planefit = cal_and_cut(after_filter, out_mask,50);
+	int after_planefit = cal_and_cut(after_filter, out_mask,10);
 
 	// cv::imshow("sample ", img);
 	// cv::imshow("mask after inverse", out_mask);
