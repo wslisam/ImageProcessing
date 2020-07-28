@@ -223,7 +223,7 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
 
 		rectangle(img, boundRect[i], cv::Scalar(255, 0, 255));
 
-		imshow("Rect", img);
+		// imshow("Rect", img);
 
 		cout << "Rect " << i << endl;
 
@@ -267,7 +267,7 @@ int find_num_obj_using_contours(cv::Mat img)
 		cv::drawContours(output, contours, i, 0x0000BBBB);
 	}
 
-	cv::imshow("Contours Result", output);
+	// cv::imshow("Contours Result", output);
 
 	return contours.size();
 }
@@ -276,6 +276,10 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 {
 	int height = img.rows;
 	int width = img.cols;
+
+	cv::Mat final = img.clone();
+	cv::Mat result_rect;
+	cv::Mat rect_roi;
 
 	vector<vector<cv::Point>> contours;
 	findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -346,8 +350,12 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 
 		// cout << "num" << num_of_sample[seg] << endl;
 
-		single_planefit(m_roi, mask_roi, Grid_size, M_B[seg], M_A[seg], num_of_sample[seg], rect_coord);
+		result_rect = single_planefit(m_roi, mask_roi, Grid_size, M_B[seg], M_A[seg], num_of_sample[seg], rect_coord);
+		rect_roi = final(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second, result_rect.cols, result_rect.rows));
+		result_rect.copyTo(rect_roi, m_roi);
 	}
+
+	cv::imshow("final", final);
 
 	// for (vector<vector<vector<float>>>::const_iterator i = M_A.begin(); i != M_A.end(); ++i)
 	// 				{
@@ -363,10 +371,10 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 	return 0;
 }
 
-void single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord)
+cv::Mat single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord)
 {
 	cv::imshow("ROI", contour_region);
-	cv::imshow("MASKROI", mask_region);
+	// cv::imshow("MASKROI", mask_region);
 	cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
 	cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
 	cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
@@ -436,9 +444,9 @@ void single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size,
 			}
 		}
 	}
-	cv::imshow("after fit", after_fit);
+	// cv::imshow("after fit", after_fit);
 
 	// cv::imshow("result", result);
 
-	return;
+	return after_fit;
 }
