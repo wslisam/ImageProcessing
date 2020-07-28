@@ -308,7 +308,7 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 			{ // rect seg  point 0
 				dx = ((x - x_0) / (x_1 - x_0 * 1.0));
 
-				if (mask.at<uchar>(y, x) != 0)
+				if (mask.at<uchar>(y, x) >= 0)
 				{
 					pixel_val = img.at<uchar>(y, x);
 					// cout<<pixel_val<<endl;
@@ -317,7 +317,7 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 					M_B.at(seg).push_back(vector<int>());
 					M_B.at(seg)[num_of_sample[seg]].push_back(pixel_val);
 					// cout<<M_B.at(seg)[num_of_sample[seg]][0]<<endl;
-				
+
 					// M_B.push_back(M_B[seg]);
 
 					vector<float> temp_row;
@@ -346,7 +346,7 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 
 		// cout << "num" << num_of_sample[seg] << endl;
 
-		single_planefit(m_roi, mask_roi, Grid_size, M_B[seg], M_A[seg], num_of_sample[seg]);
+		single_planefit(m_roi, mask_roi, Grid_size, M_B[seg], M_A[seg], num_of_sample[seg], rect_coord);
 	}
 
 	// for (vector<vector<vector<float>>>::const_iterator i = M_A.begin(); i != M_A.end(); ++i)
@@ -363,7 +363,7 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 	return 0;
 }
 
-void single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample)
+void single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord)
 {
 	cv::imshow("ROI", contour_region);
 	cv::imshow("MASKROI", mask_region);
@@ -389,11 +389,55 @@ void single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size,
 
 	cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
 
-   	cout << "result" << endl;
+	cp_struct cp[4];
+	cp[0].x_coord = 0;
+	cp[0].y_coord = 0;
+	cp[1].x_coord = 1;
+	cp[1].y_coord = 0;
+	cp[2].x_coord = 0;
+	cp[2].y_coord = 1;
+	cp[3].x_coord = 1;
+	cp[3].y_coord = 1;
+
+	cout << "result" << endl;
 	for (int n = 0; n <= 3; n++)
-	{ 
-		cout << result.at<float>(n, 1) << endl;
+	{
+		// cout << result.at<float>(n, 0) << endl;
+		cp[n].z_value = result.at<float>(n, 0); // float to int
+		cout << "x : " << cp[n].x_coord << " y : " << cp[n].y_coord << endl;
+		cout << cp[n].z_value << endl;
 	}
+	cout << endl;
+
+	cv::Mat after_fit = cv::Mat::zeros(contour_region.size(), CV_8UC1);
+	int pixel_val = 0;
+
+	int height = contour_region.rows;
+	int width = contour_region.cols;
+	float dx, dy;
+	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
+
+	for (int y = 0 + 1; y < height; y++)
+	{
+		dy = ((y - y_0) / (height - y_0 * 1.0));
+		for (int x = 0 + 1; x < width; x++)
+		{
+			dx = ((x - x_0) / (width - x_0 * 1.0));
+
+			if (mask_region.at<uchar>(y, x) != 0)
+			{
+
+				pixel_val = ((1.0 - dx) * dy) * cp[0].z_value +
+							(dx * dy) * cp[1].z_value +
+							((1.0 - dx) * (1.0 - dy)) * cp[2].z_value +
+							(dx * (1.0 - dy)) * cp[3].z_value;
+
+				after_fit.at<uchar>(y, x) = pixel_val;
+			}
+		}
+	}
+	cv::imshow("after fit", after_fit);
+
 	// cv::imshow("result", result);
 
 	return;

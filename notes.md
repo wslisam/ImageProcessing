@@ -235,3 +235,7 @@ for (int y = 0 + 1; y < height - 1; y += Grid_size)
 	// cout << typeid(result).name() << endl;
 	// cout << (matrix_a.type() == CV_32F) << endl;
 ```
+
+https://vector-of-bool.github.io/docs/vscode-cmake-tools/debugging.html
+
+https://cmake.org/install/
