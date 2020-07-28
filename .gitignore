@@ -1,3 +1,7 @@
 
 *.bmp
-build/
+
+# macOS Files
+.DS_Store
+
+/Users/wsli1998/Documents/ImageProcessing/build/
