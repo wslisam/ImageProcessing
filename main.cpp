@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 
 	if (img.empty())
 	{
-		cout << "!!! Failed imread(): image not found" << endl;
+		cout << "!!!! Failed imread(): image not found" << endl;
 		return -1;
 	}
 	// cv::Mat test2 = color_bilinear(img);
