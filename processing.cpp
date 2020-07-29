@@ -520,11 +520,8 @@ cv::Mat multi_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_s
 	return after_fit;
 }
 
-int segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size_y)
+int segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size_y, int sample_size)
 {
-	int height = img.rows;
-	int width = img.cols;
-
 	vector<vector<cv::Point>> contours;
 	findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 	vector<vector<pair<int, int>>> rect_coord = rect_contours(img, contours);
@@ -542,8 +539,8 @@ int segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size_y)
 		contourRect = cv::boundingRect(contours[seg]);
 
 		// cout << "boundrect dim: W: " << contourRect.width << "  H: " << contourRect.height << endl;
-		region_number_y[seg] = (contourRect.height / 100);
-		region_number_x[seg] = (contourRect.width / 100);
+		region_number_y[seg] = (contourRect.height / sample_size);
+		region_number_x[seg] = (contourRect.width / sample_size);
 		// cout << "contour  num x " << region_number_x[seg] << " num y " << region_number_y[seg] << endl;
 	}
 
@@ -551,57 +548,71 @@ int segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size_y)
 	// int region[num_of_region][region_number_x][region_number_y];
 
 	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
-	int w = 0, h = 0;
+	int width = 0, height = 0;
 
 	vector<cv::Rect> img_Cells;
 	vector<cv::Rect> mask_Cells;
 
 	int x = 0;
-	int count = 0;
+	int last_x = 0;
 
 	for (int seg = 0; seg < num_of_region; seg++) // seg = region index
 	{
 		y_0 = rect_coord[seg][0].second;
 		y_1 = rect_coord[seg][2].second;
 		// num_of_sample[seg] = 0;
-		*Grid_size_y = (rect_coord[seg][2].second - rect_coord[seg][0].second) / region_number_y[seg];
-		for (int y = y_0; y <= y_1 - *Grid_size_y; y += *Grid_size_y) // size can the same
+		*Grid_size_y = (rect_coord[seg][2].second - rect_coord[seg][0].second) / (region_number_y[seg]);
+		for (int y = y_0; y < y_1 - *Grid_size_y; y += *Grid_size_y) // size can the same
 		{
 			x_0 = rect_coord[seg][0].first;
 			x_1 = rect_coord[seg][1].first;
 
-			w = 0;
+			width = 0;
 			// cout << "reg num: " << region_number_x[seg] << endl;
-			*Grid_size_x = (rect_coord[seg][1].first - rect_coord[seg][0].first) / region_number_x[seg];
+			*Grid_size_x = (rect_coord[seg][1].first - rect_coord[seg][0].first) / (region_number_x[seg]);
 
-			for (x = x_0; x < x_1 - *Grid_size_x - 1; x += *Grid_size_x)
+			for (x = x_0; x < x_1 - *Grid_size_x; x += *Grid_size_x)
 			{
 				cv::Rect grid_rect(x, y, *Grid_size_x, *Grid_size_y);
-				// cv::imshow("grid_Rect", grid_rect);
 				img_Cells.push_back(grid_rect);
 				cv::rectangle(img, grid_rect, cv::Scalar(0, 255, 0), 0);
 				cv::imshow("img", img);
-				cv::imshow(cv::format("Grid: seg:%d  %d%d", seg, w, h), img(grid_rect));
+				cv::imshow(cv::format("IMG_Grid: seg:%d  %d%d", seg, width, height), img(grid_rect));
+				// cv::waitKey(0);
+				mask_Cells.push_back(grid_rect);
+				cv::rectangle(mask, grid_rect, cv::Scalar(0, 255, 0), 0);
+				// cv::imshow("mask", mask);
+				// cv::imshow(cv::format("MASK_Grid: seg:%d  %d%d", seg, width, height), mask(grid_rect));
+				// cv::waitKey(0);
+				cal_and_cut(img(grid_rect), mask(grid_rect),10);
 				cv::waitKey(0);
-				w++;
-				count = x;
-				// cal_and_cut(img, mask,100);
+
+				width++;
+				last_x = x;
 			}
 
 			{
-				cv::Rect grid_rect(count + (*Grid_size_x), y, x_1 - (count + (*Grid_size_x)), (*Grid_size_y));
-				// cv::imshow("grid_Rect", grid_rect);
+				cv::Rect grid_rect(last_x + (*Grid_size_x), y, x_1 - (last_x + (*Grid_size_x)), (*Grid_size_y));
 				img_Cells.push_back(grid_rect);
 				cv::rectangle(img, grid_rect, cv::Scalar(0, 255, 0), 1);
-				cv::imshow("img", img);
-				cv::imshow(cv::format("Grid: seg:%d  %d%d", seg, w, h), img(grid_rect));
+				// cv::imshow("img", img);
+				// cv::imshow(cv::format("IMG_Grid: seg:%d  %d%d", seg, width, height), img(grid_rect));
+				// cv::waitKey(0);
+				mask_Cells.push_back(grid_rect);
+				cv::rectangle(mask, grid_rect, cv::Scalar(0, 255, 0), 0);
+				// cv::imshow("mask", mask);
+				// cv::imshow(cv::format("MASK_Grid: seg:%d  %d%d", seg, width, height), mask(grid_rect));
+				// cv::waitKey(0);
+				cal_and_cut(img(grid_rect), mask(grid_rect),10);
 				cv::waitKey(0);
-				w++;
+
+
+				width++;
 			}
 
-			h++;
+			height++;
 		}
-		h = 0;
+		height = 0;
 	}
 
 	// cv::Mat input_roi = input(cv::Rect(x_pos, y_pos, w, h)); //e.g function contour to cv rect
