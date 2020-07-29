@@ -200,16 +200,6 @@ cv::Mat thresholding(cv::Mat input, int threshold)
 	return out;
 }
 
-cv::Mat segmentation(cv::Mat input, int x_pos, int y_pos, int w, int h)
-{
-
-	cv::Mat input_roi = input(cv::Rect(x_pos, y_pos, w, h)); //e.g function contour to cv rect
-															 // depend on w , h  , not area
-															 //    cv::Rect(x_pos,y_pos,w,h)
-															 //    cv::imwrite("ROI.bmp",input_roi);
-	return input_roi;
-}
-
 vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Point>> contours)
 {
 	vector<cv::Rect> boundRect(contours.size());
@@ -220,7 +210,9 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
 	for (int i = 0; i < contours.size(); i++)
 	{
 		boundRect[i] = boundingRect(contours[i]); //  次次都右至左  下至上
+		// cv::Rect2i contourRect = cv::boundingRect(contours[i]);
 
+		// cout<<"boundrect dim"<< contourRect.width <<endl;
 		rectangle(img, boundRect[i], cv::Scalar(255, 0, 255));
 
 		// imshow("Rect", img);
@@ -272,7 +264,7 @@ int find_num_obj_using_contours(cv::Mat img)
 	return contours.size();
 }
 
-int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
+int cal_and_cut(cv::Mat img, cv::Mat mask, int sample_size)
 {
 	int height = img.rows;
 	int width = img.cols;
@@ -301,14 +293,14 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 		y_1 = rect_coord[seg][2].second;
 		num_of_sample[seg] = 0;
 
-		for (int y = y_0 + 1; y < y_1; y += Grid_size) // size can the same
+		for (int y = y_0 + 1; y < y_1; y += sample_size) // size can the same
 		{
 			dy = ((y - y_0) / (y_1 - y_0 * 1.0));
 
 			x_0 = rect_coord[seg][0].first;
 			x_1 = rect_coord[seg][1].first;
 
-			for (int x = x_0 + 1; x < x_1; x += Grid_size)
+			for (int x = x_0 + 1; x < x_1; x += sample_size)
 			{ // rect seg  point 0
 				dx = ((x - x_0) / (x_1 - x_0 * 1.0));
 
@@ -350,9 +342,9 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 
 		// cout << "num" << num_of_sample[seg] << endl;
 
-		result_rect = single_planefit(m_roi, mask_roi, Grid_size, M_B[seg], M_A[seg], num_of_sample[seg], rect_coord);
+		result_rect = single_planefit(m_roi, mask_roi, sample_size, M_B[seg], M_A[seg], num_of_sample[seg], rect_coord);
 		rect_roi = final(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second, result_rect.cols, result_rect.rows));
-		result_rect.copyTo(rect_roi, m_roi);  // mask size need to same as rect roi so only m_roi
+		result_rect.copyTo(rect_roi, m_roi); // mask size need to same as rect roi so only m_roi
 	}
 
 	cv::imshow("final", final);
@@ -371,7 +363,7 @@ int cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size)
 	return 0;
 }
 
-cv::Mat single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord)
+cv::Mat single_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord)
 {
 	cv::imshow("ROI", contour_region);
 	// cv::imshow("MASKROI", mask_region);
@@ -449,4 +441,168 @@ cv::Mat single_planefit(cv::Mat contour_region, cv::Mat mask_region, int Grid_si
 	// cv::imshow("result", result);
 
 	return after_fit;
+}
+
+cv::Mat multi_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord)
+{
+	cv::imshow("ROI", contour_region);
+	// cv::imshow("MASKROI", mask_region);
+	cv::Mat result = cv::Mat::zeros(4, 1, CV_32FC1);
+	cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, 4, CV_32FC1);
+	cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
+
+	//圖入黎,seg唔seg ,／ 直斬，每一份掉入去一個reg ,掉function cut格
+
+	for (int sample = 0; sample < num_of_sample; sample++)
+	{
+		matrix_b.at<float>(sample, 0) = M_B[sample][0];
+		// cout<<M_B[sample][0]<<endl;
+	}
+
+	for (int current_row = 0; current_row < num_of_sample; current_row++)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			matrix_a.at<float>(current_row, i) = M_A[current_row][i];
+		}
+	}
+
+	cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
+
+	cp_struct cp[4];
+	cp[0].x_coord = 0;
+	cp[0].y_coord = 0;
+	cp[1].x_coord = 1;
+	cp[1].y_coord = 0;
+	cp[2].x_coord = 0;
+	cp[2].y_coord = 1;
+	cp[3].x_coord = 1;
+	cp[3].y_coord = 1;
+
+	cout << "result" << endl;
+	for (int n = 0; n <= 3; n++)
+	{
+		// cout << result.at<float>(n, 0) << endl;
+		cp[n].z_value = result.at<float>(n, 0); // float to int
+		cout << "x : " << cp[n].x_coord << " y : " << cp[n].y_coord << endl;
+		cout << cp[n].z_value << endl;
+	}
+	cout << endl;
+
+	cv::Mat after_fit = cv::Mat::zeros(contour_region.size(), CV_8UC1);
+	int pixel_val = 0;
+
+	int height = contour_region.rows;
+	int width = contour_region.cols;
+	float dx, dy;
+	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
+
+	for (int y = 0 + 1; y < height; y++)
+	{
+		dy = ((y - y_0) / (height - y_0 * 1.0));
+		for (int x = 0 + 1; x < width; x++)
+		{
+			dx = ((x - x_0) / (width - x_0 * 1.0));
+
+			if (mask_region.at<uchar>(y, x) != 0)
+			{
+
+				pixel_val = ((1.0 - dx) * dy) * cp[0].z_value +
+							(dx * dy) * cp[1].z_value +
+							((1.0 - dx) * (1.0 - dy)) * cp[2].z_value +
+							(dx * (1.0 - dy)) * cp[3].z_value;
+
+				after_fit.at<uchar>(y, x) = pixel_val;
+			}
+		}
+	}
+
+	return after_fit;
+}
+
+int segmentation(cv::Mat img, cv::Mat mask, int Grid_size)
+{
+	int height = img.rows;
+	int width = img.cols;
+
+	vector<vector<cv::Point>> contours;
+	findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	vector<vector<pair<int, int>>> rect_coord = rect_contours(img, contours);
+
+	int num_of_region = contours.size();
+	cout<<"number of region"<<num_of_region<<endl;
+
+	int region_number_y[num_of_region];
+	int region_number_x[num_of_region];
+
+	cv::Rect2i contourRect;
+
+	for (int seg = 0; seg < num_of_region; seg++) // how many region
+	{
+		contourRect = cv::boundingRect(contours[seg]);
+
+		// cout << "boundrect dim: W: " << contourRect.width << "  H: " << contourRect.height << endl;
+		region_number_y[seg] = (contourRect.height / 100);
+		region_number_x[seg] = (contourRect.width / 100);
+		// cout << "contour  num x " << region_number_x[seg] << " num y " << region_number_y[seg] << endl;
+	}
+
+	// int num_of_sample[num_of_region][region_number_x][region_number_y];
+	// int region[num_of_region][region_number_x][region_number_y];
+
+	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
+	int w = 0, h = 0;
+
+	vector<cv::Rect> mCells;
+	int x = 0;
+	int count = 0;
+
+	for (int seg = 0; seg < num_of_region; seg++) // seg = region index
+	{
+		y_0 = rect_coord[seg][0].second;
+		y_1 = rect_coord[seg][2].second;
+		// num_of_sample[seg] = 0;
+
+		for (int y = y_0; y < y_1 - Grid_size; y += Grid_size) // size can the same
+		{
+			x_0 = rect_coord[seg][0].first;
+			x_1 = rect_coord[seg][1].first;
+
+			w = 0;
+
+			for (x = x_0; x < x_1 - Grid_size; x += Grid_size)
+			{
+				cv::Rect grid_rect(x, y, Grid_size, Grid_size);
+				// cv::imshow("grid_Rect", grid_rect);
+				mCells.push_back(grid_rect);
+				cv::rectangle(img, grid_rect, cv::Scalar(0, 255, 0), 3);
+				cv::imshow("img", img);
+				cv::imshow(cv::format("Grid: seg:%d  %d%d", seg, w, h), img(grid_rect));
+				cv::waitKey(0);
+				w++;
+				count = x;
+                // cal_and_cut(img, mask,100);
+				// region_number_y[seg]
+			}
+			// cout<<x_1<<" , "<< y<<endl;
+			cv::Rect grid_rect(count + Grid_size, y, x_1 - (count + Grid_size), Grid_size);
+			// cv::imshow("grid_Rect", grid_rect);
+			mCells.push_back(grid_rect);
+			cv::rectangle(img, grid_rect, cv::Scalar(0, 255, 0), 3);
+			cv::imshow("img", img);
+			cv::imshow(cv::format("Grid: seg:%d  %d%d", seg, w, h), img(grid_rect));
+			cv::waitKey(0);
+			w++;
+
+			h++;
+		}
+		h = 0;
+	}
+
+	// cv::Mat input_roi = input(cv::Rect(x_pos, y_pos, w, h)); //e.g function contour to cv rect
+	// 														 // depend on w , h  , not area
+	// 														 //    cv::Rect(x_pos,y_pos,w,h)
+	// 														 //    cv::imwrite("ROI.bmp",input_roi);
+
+	return 0;
 }
