@@ -35,9 +35,10 @@ int main(int argc, char **argv)
 	// int num_objects = find_num_obj_using_ConnectedComponents(after_filter);
 	int num_objects = find_num_obj_using_contours(after_filter);
 
-	int after_planefit = segmentation(after_filter, out_mask,100);
+	int G_size_x = 0, G_size_y = 0;
+	int after_planefit = segmentation(after_filter, out_mask, &G_size_x, &G_size_y);
+	cout << "G_x: " << G_size_x << " y: " << G_size_y << endl;
 	// int after_planefit = cal_and_cut(after_filter, out_mask,100);
-
 
 	// cv::imshow("sample ", img);
 	// cv::imshow("mask after inverse", out_mask);
