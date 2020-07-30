@@ -419,10 +419,10 @@ cv::Mat single_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_
 	float dx, dy;
 	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
 
-	for (int y = 0 + 1; y < height; y++)
+	for (int y = 0; y < height; y++)
 	{
 		dy = ((y - y_0) / (height - y_0 * 1.0));
-		for (int x = 0 + 1; x < width; x++)
+		for (int x = 0; x < width; x++)
 		{
 			dx = ((x - x_0) / (width - x_0 * 1.0));
 
@@ -560,6 +560,7 @@ cv::Mat segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size
 	cv::Mat tempimg;
 	int x = 0;
 	int last_x = 0;
+	
 
 	for (int seg = 0; seg < num_of_region; seg++) // seg = region index
 	{
@@ -577,7 +578,9 @@ cv::Mat segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size
 			*Grid_size_x = (rect_coord[seg][1].first - rect_coord[seg][0].first) / (region_number_x[seg]);
 
 			for (x = x_0; x < x_1 - *Grid_size_x; x += *Grid_size_x)
-			{
+			{  
+				
+				cout << "hellllllll    " << x << endl;
 				cv::Rect grid_rect(x, y, *Grid_size_x, *Grid_size_y);
 				img_Cells.push_back(grid_rect);
 				// cv::rectangle(img, grid_rect, cv::Scalar(0, 255, 0), 0);
@@ -590,9 +593,9 @@ cv::Mat segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size
 				// cv::imshow(cv::format("MASK_Grid: seg:%d  %d%d", seg, width, height), mask(grid_rect));
 				// cv::waitKey(0);
 				tempimg = cal_and_cut(img(grid_rect), mask(grid_rect), 10);
-					rect_roi = img(cv::Rect(x, y, tempimg.cols, tempimg.rows));
-					tempimg.copyTo(rect_roi, mask(grid_rect)); 
-					// cv::imshow("tempimg",tempimg);
+				rect_roi = img(cv::Rect(x, y, tempimg.cols, tempimg.rows));
+				tempimg.copyTo(rect_roi, mask(grid_rect));
+				// cv::imshow("tempimg",tempimg);
 				// cv::waitKey(0);
 
 				width++;
@@ -614,7 +617,7 @@ cv::Mat segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size
 				{
 					tempimg = cal_and_cut(img(grid_rect), mask(grid_rect), 10);
 					rect_roi = img(cv::Rect(x, y, tempimg.cols, tempimg.rows));
-					tempimg.copyTo(rect_roi, mask(grid_rect)); 
+					tempimg.copyTo(rect_roi, mask(grid_rect));
 				}
 				// cv::waitKey(0);
 

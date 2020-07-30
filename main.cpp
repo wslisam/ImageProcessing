@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 	cv::Mat after_filter = filter(img, out_mask);
 
 	// int num_objects = find_num_obj_using_ConnectedComponents(after_filter);
-	int num_objects = find_num_obj_using_contours(after_filter);
+	// int num_objects = find_num_obj_using_contours(after_filter);
 
 	int G_size_x = 0, G_size_y = 0;
 	cv::Mat after_planefit = segmentation(after_filter.clone(), out_mask, &G_size_x, &G_size_y,40);//50,40
