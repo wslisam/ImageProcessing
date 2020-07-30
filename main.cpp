@@ -36,9 +36,9 @@ int main(int argc, char **argv)
 	int num_objects = find_num_obj_using_contours(after_filter);
 
 	int G_size_x = 0, G_size_y = 0;
-	int after_planefit = segmentation(after_filter, out_mask, &G_size_x, &G_size_y, 100);
+	cv::Mat after_planefit = segmentation(after_filter.clone(), out_mask, &G_size_x, &G_size_y,40);//50,40
 	// cout << "G_x: " << G_size_x << " y: " << G_size_y << endl;
-	// int after_planefit = cal_and_cut(after_filter, out_mask,100);
+	// int after_planefit = cal_and_cut(after_filter, out_mask,5);
 
 	// cv::imshow("sample ", img);
 	// cv::imshow("mask after inverse", out_mask);
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	// cv::Mat test = gray_bilinear(after_filter);
 	// cv::imshow("Bilinear Interpolation", test);
 
-	// cv::imshow("planefit", after_planefit);
+	cv::imshow("planefit", after_planefit);
 
 	cv::waitKey(0);
 	cv::destroyAllWindows();
