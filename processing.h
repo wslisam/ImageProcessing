@@ -18,14 +18,22 @@ struct cp_struct // control point (角既point )
 {
     int x_coord = 0;
     int y_coord = 0;
-    int z_value = 0;
+    float z_value = 0;  // 小數做intepolation , 最尾先比人選round up 定 round down   (普通round)
+    //cv::Point3_< _Tp > Class Template Reference
 };
+//cv ::3dpoint
 
 struct grid_struct
 {
-    vector<cp_struct> point;
+    vector<cp_struct> point;   // 	// block struct {width , heigh   }
     cv::Mat ref_plane; // plane既樣 （形容個order係左至右，上至下）
 };
+//value 入 matrix ,  之後補0   ,solve , 嘔 mat 
+// *  *  *   選一邊 (都是同一組數字)
+// |  |  |
+// *  *  *
+// block 直橫線先處理  之後先掉中間d數入去處理
+
 
 //auto support single plane fit (when  one region)  out ref plane , 好多個4/6/9角result
 //expolation

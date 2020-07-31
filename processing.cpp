@@ -502,9 +502,23 @@ cv::Mat multi_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_s
 
 	for (int y = 0 + 1; y < height; y++)
 	{
+
+		//check height == y_0
+
+		// if ((height - x_0 * 1.0) == 0)
+		// {
+		// 	height = height + 1;
+		// }
+
 		dy = ((y - y_0) / (height - y_0 * 1.0));
 		for (int x = 0 + 1; x < width; x++)
 		{
+			// if ((width - x_0 * 1.0) == 0)
+			// {
+			// 	width = width + 1;
+			// }
+			//check with == x_0  , set it to 0.000001
+			// 4 pixel 變成 50 x 50  cv::resize linear
 			dx = ((x - x_0) / (width - x_0 * 1.0));
 
 			if (mask_region.at<uchar>(y, x) != 0)
@@ -560,7 +574,6 @@ cv::Mat segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size
 	cv::Mat tempimg;
 	int x = 0;
 	int last_x = 0;
-	
 
 	for (int seg = 0; seg < num_of_region; seg++) // seg = region index
 	{
@@ -568,7 +581,7 @@ cv::Mat segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size
 		y_1 = rect_coord[seg][2].second;
 		// num_of_sample[seg] = 0;
 		*Grid_size_y = (rect_coord[seg][2].second - rect_coord[seg][0].second) / (region_number_y[seg]);
-		for (int y = y_0; y < y_1 - *Grid_size_y; y += *Grid_size_y) // size can the same
+		for (int y = y_0; y <= y_1 - *Grid_size_y; y += *Grid_size_y) // size can the same
 		{
 			x_0 = rect_coord[seg][0].first;
 			x_1 = rect_coord[seg][1].first;
@@ -578,14 +591,17 @@ cv::Mat segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size
 			*Grid_size_x = (rect_coord[seg][1].first - rect_coord[seg][0].first) / (region_number_x[seg]);
 
 			for (x = x_0; x < x_1 - *Grid_size_x; x += *Grid_size_x)
-			{  
-				
-				cout << "hellllllll    " << x << endl;
+			{
+
+				// cout << "hellllllll    " << x << endl;
 				cv::Rect grid_rect(x, y, *Grid_size_x, *Grid_size_y);
+				// cout << "heeeeeelo" << x << x+*Grid_size_x<<endl;
 				img_Cells.push_back(grid_rect);
+
 				// cv::rectangle(img, grid_rect, cv::Scalar(0, 255, 0), 0);
 				cv::imshow("img", img);
 				cv::imshow(cv::format("IMG_Grid: seg:%d  %d%d", seg, width, height), img(grid_rect));
+
 				// cv::waitKey(0);
 				mask_Cells.push_back(grid_rect);
 				// cv::rectangle(mask, grid_rect, cv::Scalar(0, 255, 0), 0);
