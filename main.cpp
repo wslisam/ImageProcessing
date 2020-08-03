@@ -5,8 +5,8 @@ int main(int argc, char **argv)
 
 	// cv::Mat img = cv::imread("./Surface_Fitting_image/colorplane/test.bmp");
 	// cv::Mat mask = cv::imread("./Surface_Fitting_image/colorplane/mask.bmp");
-	cv::Mat img = cv::imread("./Surface_Fitting_image/7/Input3.bmp");
-	cv::Mat mask = cv::imread("./Surface_Fitting_image/7/mask.bmp");
+	cv::Mat img = cv::imread("./Surface_Fitting_image/1/Input3.bmp");
+	cv::Mat mask = cv::imread("./Surface_Fitting_image/1/mask.bmp");
 
 	cv::Mat fit_img;
 
@@ -36,7 +36,9 @@ int main(int argc, char **argv)
 	// int num_objects = find_num_obj_using_contours(after_filter);
 
 	int G_size_x = 0, G_size_y = 0;
-	cv::Mat after_planefit = segmentation(after_filter.clone(), out_mask, &G_size_x, &G_size_y , 100);//50,40,55-59
+	// cv::Mat after_planefit = segmentation(after_filter.clone(), out_mask, &G_size_x, &G_size_y , 100);//50,40,55-59
+	cv::Mat after_planefit = gen2_segmentation(after_filter.clone(), out_mask, &G_size_x, &G_size_y, 2); //50,40,55-59
+
 	// cout << "G_x: " << G_size_x << " y: " << G_size_y << endl;
 	// int after_planefit = cal_and_cut(after_filter, out_mask,5);
 

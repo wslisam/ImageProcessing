@@ -18,7 +18,7 @@ struct cp_struct // control point (角既point )
 {
     int x_coord = 0;
     int y_coord = 0;
-    float z_value = 0;  // 小數做intepolation , 最尾先比人選round up 定 round down   (普通round)
+    int z_value = 0;  // 小數做intepolation , 最尾先比人選round up 定 round down   (普通round)
     //cv::Point3_< _Tp > Class Template Reference
 };
 //cv ::3dpoint
@@ -54,9 +54,11 @@ cv::Mat color_bilinear_buildin(cv::Mat img, double r1 = 0.0, double r2 = 0.0);
 
 vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Point>> contours);
 
-cv::Mat cal_and_cut(cv::Mat img, cv::Mat mask, int Grid_size);
+cv::Mat cal_and_cut(cv::Mat img, cv::Mat mask, int sample_size);
 cv::Mat single_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord);
 cv::Mat multi_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord);
 cv::Mat segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size_y, int sample_size);
+cv::Mat gen2_segmentation(cv::Mat img, cv::Mat mask, int *Grid_size_x, int *Grid_size_y, int dimension);
+
 
 #endif
