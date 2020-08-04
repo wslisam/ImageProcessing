@@ -701,9 +701,9 @@ cv::Mat planefit(cv::Mat img, cv::Mat mask, int, int, int)
 								 rect_coord[seg][2].second - rect_coord[seg][0].second));
 
 		cout << "seg: " << seg << endl;
-		num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 10);
+		num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 2);
 		cout << "num_of_sample:  " << num_of_sample[seg] << endl;
-		multi_planefit(m_roi, mask_roi, 10, num_of_sample[seg]);
+		multi_planefit(m_roi, mask_roi, 2, num_of_sample[seg]);
 		// cv::imshow("final", mask_roi);
 		// cv::waitKey(0);
 	}
@@ -722,9 +722,8 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_o
 	int width = img.cols;
 	int count = 0;
 
-	float dx, dy;
+	float dx, dy, temp;
 	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
-	vector<vector<vector<float>>> M_A;
 
 	for (int y = 0; y < height; y += sample_size)
 	{
@@ -737,25 +736,80 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_o
 		}
 	}
 
-	for (int current_row = 0; current_row < num_of_sample; current_row++)
+	for (int current_row = 0; current_row < height; current_row += sample_size)
 	{
-		if (current_row < (width / 2))
-		{ // 0134
-			matrix_a.at<float>(current_row, 0) = 1;
-			matrix_a.at<float>(current_row, 1) = 1;
-			matrix_a.at<float>(current_row, 3) = 1;
-			matrix_a.at<float>(current_row, 4) = 1;
-		}
-		else if(current_row > (width / 2))
+		dy = (height - 0);
+		for (int current_col = 0; current_col < width; current_col += sample_size)
 		{
-			matrix_a.at<float>(current_row, 1) = 1;
-			matrix_a.at<float>(current_row, 2) = 1;
-			matrix_a.at<float>(current_row, 4) = 1;
-			matrix_a.at<float>(current_row, 5) = 1;
+
+			cout << "dx:  " << dx << endl;
+			cout << "dy:  " << dy << endl;
+			cout << "------------------" << endl;
+
+			if (mask_img.at<uchar>(current_row, current_col) >= 0)
+			{
+				dx = current_col / 2;
+				// temp = 1 / (dx * dy);
+				temp = (1.0 / (height * (width / 2)));
+
+				if (current_row <= (width / 2))
+				{ // 0134
+
+					matrix_a.at<float>(current_row, 0) = temp * (width / 2 - current_col) * (height - current_row); // (x2-x)(y-y1)
+					matrix_a.at<float>(current_row, 1) = temp * (current_col - 0) * (height - current_row);			//(x-x1)(y-y1)
+					matrix_a.at<float>(current_row, 3) = temp * (width / 2 - current_col) * (current_row - 0);		// (x2-x)(y2-y)
+					matrix_a.at<float>(current_row, 4) = temp * (current_col - 0) * (current_row - 0);				//(x-x1)(y2-y)
+																													// cout << "val:" << 1 / (dx * dy) << endl;
+																													// cout << "val:" << 1 / (dx * dy) << endl;
+																													// cout << "val:" << 1 / (dx * dy) << endl;
+																													// cout << "val:" << 1 / (dx * dy) << endl;
+				}
+				else if (current_row > (width / 2))
+				{
+
+					matrix_a.at<float>(current_row, 1) = temp * (width - current_col) * (height - current_row);		// (x2-x)(y-y1)
+					matrix_a.at<float>(current_row, 2) = temp * (current_col - width / 2) * (height - current_row); //(x-x1)(y-y1)
+					matrix_a.at<float>(current_row, 4) = temp * (width - current_col) * (current_row - 0);			// (x2-x)(y2-y)
+					matrix_a.at<float>(current_row, 5) = temp * (current_col - width / 2) * (current_row - 0);		//(x-x1)(y2-y)
+
+					// cout << "val:" << temp << endl;
+					// cout << "val:" << temp << endl;
+					// cout << "val:" << temp << endl;
+					// cout << "val:" << temp << endl;
+				}
+			}
 		}
 	}
+	cv::Mat dst, dst2;
+	cv::Mat test = cv::Mat::zeros(2, 2, CV_8UC1);
+	cv::Mat test2 = cv::Mat::zeros(2, 2, CV_8UC1);
 
 	cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
+
+	cout << "result matrix:    " << (int)result.at<float>(0, 0) << endl;
+	cout << "result matrix:    " << (int)result.at<float>(1, 0) << endl;
+	cout << "result matrix:    " << (int)result.at<float>(3, 0) << endl;
+	cout << "result matrix:    " << (int)result.at<float>(4, 0) << endl;
+
+	test.at<uchar>(0, 0) = result.at<float>(0, 0);
+	test.at<uchar>(1, 0) = result.at<float>(1, 0);
+	test.at<uchar>(0, 1) = result.at<float>(3, 0);
+	test.at<uchar>(1, 1) = result.at<float>(4, 0);
+
+	test2.at<uchar>(0, 0) = result.at<float>(1, 0);
+	test2.at<uchar>(1, 0) = result.at<float>(2, 0);
+	test2.at<uchar>(0, 1) = result.at<float>(4, 0);
+	test2.at<uchar>(1, 1) = result.at<float>(5, 0);
+
+	cv::Size dsize = cv::Size(width / 2, height);
+
+	cv::resize(test, dst, dsize, 0, 0, cv::INTER_LINEAR);
+	cv::resize(test2, dst2, dsize, 0, 0, cv::INTER_LINEAR);
+	;
+	cv::imshow("111111", dst);
+	cv::imshow("22222", dst2);
+
+	cv::waitKey(0);
 
 	//result : resize
 	// 合埋
