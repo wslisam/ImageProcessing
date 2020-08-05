@@ -701,9 +701,9 @@ cv::Mat planefit(cv::Mat img, cv::Mat mask, int, int, int)
 								 rect_coord[seg][2].second - rect_coord[seg][0].second));
 
 		cout << "seg: " << seg << endl;
-		num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 2);
+		num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 55);
 		cout << "num_of_sample:  " << num_of_sample[seg] << endl;
-		multi_planefit(m_roi, mask_roi, 2, num_of_sample[seg]);
+		multi_planefit(m_roi, mask_roi, 55, num_of_sample[seg]);
 		// cv::imshow("final", m_roi);
 		// cv::waitKey(0);
 	}
@@ -725,17 +725,18 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_o
 	float dx, dy, temp;
 	int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
 
-	for (int y = 0; y < height; y += sample_size)
-	{
-		for (int x = 0; x < width; x += sample_size)
-		{
-			if (mask_img.at<uchar>(y, x) > 0)
-			{
-				matrix_b.at<float>(count, 0) = img.at<uchar>(y, x); //y 行 第x個
-				// cout<<matrix_b.at<float>(count, 0)<<endl;
-			}
-		}
-	}
+	// for (int y = 0; y < height; y += sample_size)
+	// {
+	// 	for (int x = 0; x < width; x += sample_size)
+	// 	{
+	// 		if (mask_img.at<uchar>(y, x) > 0)
+	// 		{
+	// 			matrix_b.at<float>(count, 0) = img.at<uchar>(y, x); //y 行 第x個
+	// 			count++;
+	// 			// cout<<matrix_b.at<float>(count, 0)<<endl;
+	// 		}
+	// 	}
+	// }
 	
     count = 0;
 	for (int current_row = 0; current_row < height; current_row += sample_size)
@@ -748,7 +749,7 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_o
 			// cout << "dy:  " << dy << endl;
 			// cout << "------------------" << endl;
 
-			if (mask_img.at<uchar>(current_row, current_col) > 0)
+			if (mask_img.at<uchar>(current_row, current_col) >0)
 			{
 				dx = current_col / 2;
 				// temp = 1 / (dx * dy);
@@ -758,6 +759,8 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_o
 				if (current_col <=(width/2))
 				{ // 0134
 					
+					matrix_b.at<float>(count, 0) = img.at<uchar>(current_row, current_col); //y 行 第x個
+
 					matrix_a.at<float>(count, 0) = (((width / 2) - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
 					matrix_a.at<float>(count, 1) = ((current_col - 0) * (height - current_row) )/ temp;			//(x-x1)(y-y1)
 					matrix_a.at<float>(count, 3) = ((width / 2 - current_col) * (current_row - 0)) / temp;		// (x2-x)(y2-y)
@@ -767,48 +770,88 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_o
 					cout<<"val :   "<<(current_col - 0) * (height - current_row) / temp << endl;			//(x-x1)(y-y1)
 					cout<<"val :   "<<(width / 2 - current_col) * (current_row - 0) / temp << endl;		// (x2-x)(y2-y)
 					cout<<"val :   "<<(current_col - 0) * (current_row - 0) / temp << endl;				//(x-x1)(y2-y)
-					cout<<"-------"<<endl;
+					cout<<">>>>>>>>"<<endl;
 					count++;
 					
 				}
 				else if (current_col> (width / 2))
 				{  
+					matrix_b.at<float>(count, 0) = img.at<uchar>(current_row, current_col); //y 行 第x個
+
 					matrix_a.at<float>(count, 1) = ((width - current_col) * (height - current_row)) / temp;		// (x2-x)(y-y1)
 					matrix_a.at<float>(count, 2) = ((current_col - width / 2) * (height - current_row)) / temp; //(x-x1)(y-y1)
 					matrix_a.at<float>(count, 4) = ((width - current_col) * (current_row - 0)) / temp;			// (x2-x)(y2-y)
 					matrix_a.at<float>(count, 5) = ((current_col - width / 2) * (current_row - 0))/ temp;		//(x-x1)(y2-y)
+					// cout<<"val2: "<< ((width - current_col) * (height - current_row)) / temp <<endl;		// (x2-x)(y-y1)
+					// cout<<"val2: "<< ((current_col - width / 2) * (height - current_row)) / temp <<endl; //(x-x1)(y-y1)
+					// cout<<"val2: "<< ((width - current_col) * (current_row - 0)) / temp <<endl;			// (x2-x)(y2-y)
+					// cout<<"val2: "<< ((current_col - width / 2) * (current_row - 0))/ temp <<endl;		//(x-x1)(y2-y)
+					// cout<<">>>>>>>>>>>"<<endl;
 					count++;
 
 				}
 			}
 		}
 	}
-	cv::Mat dst, dst2;
+	cv::Mat dst;
+	cv::Mat dst2;
 	cv::Mat test = cv::Mat::zeros(2, 2, CV_8UC1);
 	cv::Mat test2 =cv::Mat::zeros(2, 2, CV_8UC1);
 
-	cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
+	cv::solve(matrix_a, matrix_b, result, cv::DECOMP_NORMAL);
 
-	cout << "result matrix:    " << (int)result.at<float>(0, 0) << endl;
-	cout << "result matrix:    " << (int)result.at<float>(1, 0) << endl;
-	cout << "result matrix:    " << (int)result.at<float>(3, 0) << endl;
-	cout << "result matrix:    " << (int)result.at<float>(4, 0) << endl;
+	cout << "result matrix:    " << result.at<float>(0, 0) << endl;
+	cout << "result matrix:    " << result.at<float>(1, 0) << endl;
+	cout << "result matrix:    " << result.at<float>(3, 0) << endl;
+	cout << "result matrix:    " << result.at<float>(4, 0) << endl;
+	cout<<"<<<<<<"<<endl;
 
+	cout << "result matrix:    " << result.at<float>(0, 0) << endl;
+	cout << "result matrix:    " << result.at<float>(0, 1) << endl;
+	cout << "result matrix:    " << result.at<float>(0, 3) << endl;
+	cout << "result matrix:    " << result.at<float>(0, 4) << endl;
+	// cout<<"<<<<<<"<<endl;
+	// cout << "result matrix:    " << result.at<float>(1, 0) << endl;
+	// cout << "result matrix:    " << result.at<float>(2, 0) << endl;
+	// cout << "result matrix:    " << result.at<float>(4, 0) << endl;
+	// cout << "result matrix:    " << result.at<float>(5, 0) << endl;
+  
+//    012
+//    345
 	test.at<uchar>(0, 0) = result.at<float>(0, 0);
-	test.at<uchar>(1, 0) = result.at<float>(1, 0);
-	test.at<uchar>(0, 1) = result.at<float>(3, 0);
+	test.at<uchar>(0, 1) = result.at<float>(1, 0);
+	test.at<uchar>(1, 0) = result.at<float>(3, 0);
 	test.at<uchar>(1, 1) = result.at<float>(4, 0);
 
 	test2.at<uchar>(0, 0) = result.at<float>(1, 0);
-	test2.at<uchar>(1, 0) = result.at<float>(2, 0);
-	test2.at<uchar>(0, 1) = result.at<float>(4, 0);
+	test2.at<uchar>(0, 1) = result.at<float>(2, 0);
+	test2.at<uchar>(1, 0 ) = result.at<float>(4, 0);
 	test2.at<uchar>(1, 1) = result.at<float>(5, 0);
+
+
+	cv::imshow("test",test);
+	cv::imshow("test2",test2);
+	// cv::imwrite("test.png",test);
+	// cv::imwrite("test2.png",test2);
+
 
 	cv::Size dsize = cv::Size(width/2 , height);
 
 	cv::resize(test, dst, dsize, 0, 0, cv::INTER_LINEAR);
 	cv::resize(test2, dst2, dsize, 0, 0, cv::INTER_LINEAR);
-	;
+	 for(int i =0 ; i<dst.rows ;i++)
+	 {
+		 cout<<"L:  "<<(int)dst.at<uchar>(i,dst.cols) <<" R:   "<< (int)dst2.at<uchar>(i,0)<<endl;
+	 }
+
+	
+		 cout<<"test: " <<(int)test.at<uchar>(0,1) << "  test2:  " << (int)test2.at<uchar>(0,0)<<endl;    
+		 cout<<"test: " <<(int)test.at<uchar>(1,1) << "  test2:  " <<(int)test2.at<uchar>(1,0)<<endl;
+		//  cout<<"test: " <<(int)test.at<uchar>(0,0) << "  test2:  " <<(int)test2.at<uchar>(1,0)<<endl;
+		//  cout<<"test: " <<(int)test.at<uchar>(0,1) << "  test2:  " <<(int)test2.at<uchar>(1,1)<<endl;
+
+
+
 	cv::imshow("111111", dst);
 	cv::imshow("22222", dst2);
 
