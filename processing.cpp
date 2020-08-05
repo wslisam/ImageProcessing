@@ -852,16 +852,15 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size,
   dst.copyTo(final(cv::Rect(0, 0, dst.cols, dst.rows)));
   dst2.copyTo(final(cv::Rect(dst.cols, 0, dst2.cols, dst.rows)));
 
-        final.copyTo(img, mask_img);
-  
+  final.copyTo(img, mask_img);
+
   // cv::imshow("111111", dst);
   // cv::imshow("22222", dst2);
-  cv::imshow("333333", final);
-  cv::imshow("mask", mask_img);
-  cv::imshow("img", img);
+  // cv::imshow("333333", final);
+  // cv::imshow("mask", mask_img);
+  // cv::imshow("img", img);
 
-
-  cv::waitKey(0);
+  // cv::waitKey(0);
 
   // result : resize
   // 合埋

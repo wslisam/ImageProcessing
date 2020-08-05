@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 	// cv::imshow("Bilinear Interpolation", test);
 
 	// cv::imshow("planefit", after_seg_planefit);
-	cv::imshow("planefit", final);
+	cv::imshow("左右planefit", final);
 
 
 	cv::waitKey(0);
