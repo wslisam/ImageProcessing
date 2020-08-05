@@ -704,7 +704,7 @@ cv::Mat planefit(cv::Mat img, cv::Mat mask, int, int, int)
 		num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 2);
 		cout << "num_of_sample:  " << num_of_sample[seg] << endl;
 		multi_planefit(m_roi, mask_roi, 2, num_of_sample[seg]);
-		// cv::imshow("final", mask_roi);
+		// cv::imshow("final", m_roi);
 		// cv::waitKey(0);
 	}
 	return img;
@@ -732,57 +732,60 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_o
 			if (mask_img.at<uchar>(y, x) > 0)
 			{
 				matrix_b.at<float>(count, 0) = img.at<uchar>(y, x); //y 行 第x個
+				// cout<<matrix_b.at<float>(count, 0)<<endl;
 			}
 		}
 	}
-
+	
+    count = 0;
 	for (int current_row = 0; current_row < height; current_row += sample_size)
 	{
 		dy = (height - 0);
 		for (int current_col = 0; current_col < width; current_col += sample_size)
 		{
 
-			cout << "dx:  " << dx << endl;
-			cout << "dy:  " << dy << endl;
-			cout << "------------------" << endl;
+			// cout << "dx:  " << dx << endl;
+			// cout << "dy:  " << dy << endl;
+			// cout << "------------------" << endl;
 
-			if (mask_img.at<uchar>(current_row, current_col) >= 0)
+			if (mask_img.at<uchar>(current_row, current_col) > 0)
 			{
 				dx = current_col / 2;
 				// temp = 1 / (dx * dy);
-				temp = (1.0 / (height * (width / 2)));
+				temp = (height * (width / 2.0));
+				
 
-				if (current_row <= (width / 2))
+				if (current_col <=(width/2))
 				{ // 0134
+					
+					matrix_a.at<float>(count, 0) = (((width / 2) - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
+					matrix_a.at<float>(count, 1) = ((current_col - 0) * (height - current_row) )/ temp;			//(x-x1)(y-y1)
+					matrix_a.at<float>(count, 3) = ((width / 2 - current_col) * (current_row - 0)) / temp;		// (x2-x)(y2-y)
+					matrix_a.at<float>(count, 4) = ((current_col - 0) * (current_row - 0)) / temp;				//(x-x1)(y2-y)
 
-					matrix_a.at<float>(current_row, 0) = temp * (width / 2 - current_col) * (height - current_row); // (x2-x)(y-y1)
-					matrix_a.at<float>(current_row, 1) = temp * (current_col - 0) * (height - current_row);			//(x-x1)(y-y1)
-					matrix_a.at<float>(current_row, 3) = temp * (width / 2 - current_col) * (current_row - 0);		// (x2-x)(y2-y)
-					matrix_a.at<float>(current_row, 4) = temp * (current_col - 0) * (current_row - 0);				//(x-x1)(y2-y)
-																													// cout << "val:" << 1 / (dx * dy) << endl;
-																													// cout << "val:" << 1 / (dx * dy) << endl;
-																													// cout << "val:" << 1 / (dx * dy) << endl;
-																													// cout << "val:" << 1 / (dx * dy) << endl;
+		            cout<<"val :   "<<((width / 2) - current_col) * (height - current_row) / temp << endl; // (x2-x)(y-y1)
+					cout<<"val :   "<<(current_col - 0) * (height - current_row) / temp << endl;			//(x-x1)(y-y1)
+					cout<<"val :   "<<(width / 2 - current_col) * (current_row - 0) / temp << endl;		// (x2-x)(y2-y)
+					cout<<"val :   "<<(current_col - 0) * (current_row - 0) / temp << endl;				//(x-x1)(y2-y)
+					cout<<"-------"<<endl;
+					count++;
+					
 				}
-				else if (current_row > (width / 2))
-				{
+				else if (current_col> (width / 2))
+				{  
+					matrix_a.at<float>(count, 1) = ((width - current_col) * (height - current_row)) / temp;		// (x2-x)(y-y1)
+					matrix_a.at<float>(count, 2) = ((current_col - width / 2) * (height - current_row)) / temp; //(x-x1)(y-y1)
+					matrix_a.at<float>(count, 4) = ((width - current_col) * (current_row - 0)) / temp;			// (x2-x)(y2-y)
+					matrix_a.at<float>(count, 5) = ((current_col - width / 2) * (current_row - 0))/ temp;		//(x-x1)(y2-y)
+					count++;
 
-					matrix_a.at<float>(current_row, 1) = temp * (width - current_col) * (height - current_row);		// (x2-x)(y-y1)
-					matrix_a.at<float>(current_row, 2) = temp * (current_col - width / 2) * (height - current_row); //(x-x1)(y-y1)
-					matrix_a.at<float>(current_row, 4) = temp * (width - current_col) * (current_row - 0);			// (x2-x)(y2-y)
-					matrix_a.at<float>(current_row, 5) = temp * (current_col - width / 2) * (current_row - 0);		//(x-x1)(y2-y)
-
-					// cout << "val:" << temp << endl;
-					// cout << "val:" << temp << endl;
-					// cout << "val:" << temp << endl;
-					// cout << "val:" << temp << endl;
 				}
 			}
 		}
 	}
 	cv::Mat dst, dst2;
 	cv::Mat test = cv::Mat::zeros(2, 2, CV_8UC1);
-	cv::Mat test2 = cv::Mat::zeros(2, 2, CV_8UC1);
+	cv::Mat test2 =cv::Mat::zeros(2, 2, CV_8UC1);
 
 	cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
 
@@ -801,7 +804,7 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_o
 	test2.at<uchar>(0, 1) = result.at<float>(4, 0);
 	test2.at<uchar>(1, 1) = result.at<float>(5, 0);
 
-	cv::Size dsize = cv::Size(width / 2, height);
+	cv::Size dsize = cv::Size(width/2 , height);
 
 	cv::resize(test, dst, dsize, 0, 0, cv::INTER_LINEAR);
 	cv::resize(test2, dst2, dsize, 0, 0, cv::INTER_LINEAR);
