@@ -687,9 +687,9 @@ cv::Mat planefit(cv::Mat img, cv::Mat mask, int, int, int) {
                       rect_coord[seg][2].second - rect_coord[seg][0].second));
 
     cout << "seg: " << seg << endl;
-    num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 55);
+    num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 5);
     cout << "num_of_sample:  " << num_of_sample[seg] << endl;
-    multi_planefit(m_roi, mask_roi, 55, num_of_sample[seg]);
+    multi_planefit(m_roi, mask_roi, 5, num_of_sample[seg]);
     // cv::imshow("final", m_roi);
     // cv::waitKey(0);
   }
@@ -830,8 +830,6 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size,
 
   cv::imshow("test", test);
   cv::imshow("test2", test2);
-  // cv::imwrite("test.png",test);
-  // cv::imwrite("test2.png",test2);
 
   cv::Size dsize = cv::Size(width / 2, height);
 
@@ -849,6 +847,7 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size,
 
   cout << "test: " << (int)test.at<uchar>(1, 1)
        << " test2:  " << (int)test2.at<uchar>(1, 0) << endl;
+
   dst.copyTo(final(cv::Rect(0, 0, dst.cols, dst.rows)));
   dst2.copyTo(final(cv::Rect(dst.cols, 0, dst2.cols, dst.rows)));
 
@@ -862,8 +861,6 @@ cv::Mat multi_planefit(cv::Mat img, cv::Mat mask_img, int sample_size,
 
   // cv::waitKey(0);
 
-  // result : resize
-  // 合埋
   return img;
 }
 
