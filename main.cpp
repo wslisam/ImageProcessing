@@ -54,8 +54,8 @@ int main(int argc, char** argv)
 
     // cv::imshow("planefit", after_seg_planefit);
     cv::imshow("TMDLMR_planefit", final);
-    imwrite( "./images/test/test_filter_.bmp", after_filter );
-    imwrite( "./images/test/test_fit_5_1.bmp", final );
+    // imwrite( "./images/test/test_filter_.bmp", after_filter );
+    // imwrite( "./images/test/test_fit_5_1.bmp", final );
 
     cv::waitKey(0);
     cv::destroyAllWindows();

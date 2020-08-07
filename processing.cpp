@@ -874,7 +874,7 @@ cv::Mat gen2_planefit(cv::Mat img, cv::Mat mask)
         cout << "seg: " << seg << endl;
         num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 5);
         cout << "num_of_sample:  " << num_of_sample[seg] << endl;
-        TDLR_planefit(m_roi, mask_roi, 5 ,num_of_sample[seg]);
+        TMDLMR_planefit(m_roi, mask_roi, 5, num_of_sample[seg]);
         // cv::imshow("final", m_roi);
         // cv::waitKey(0);
     }
@@ -962,24 +962,12 @@ cv::Mat TDLR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of
     cv::Mat test3 = cv::Mat::zeros(2, 2, CV_8UC1);
     cv::Mat test4 = cv::Mat::zeros(2, 2, CV_8UC1);
 
-    cv::solve(matrix_a, matrix_b, result, cv::DECOMP_NORMAL);
-  cout<<"hi"<<endl;
-    for(int i =0 ; i <9 ; i++){
-    cout << "result matrix:    " << result.at<float>(i, 0) << endl;
-
+    cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
+    cout << "hi" << endl;
+    for (int i = 0; i < 9; i++) {
+        cout << "result matrix:    " << result.at<float>(i, 0) << endl;
     }
-  cout<<"hi"<<endl;
-
-    // cout << "result matrix:    " << result.at<float>(0, 0) << endl;
-    // cout << "result matrix:    " << result.at<float>(1, 0) << endl;
-    // cout << "result matrix:    " << result.at<float>(3, 0) << endl;
-    // cout << "result matrix:    " << result.at<float>(4, 0) << endl;
-    // cout << "<<<<<<" << endl;
-
-    // cout << "result matrix:    " << result.at<float>(0, 0) << endl;
-    // cout << "result matrix:    " << result.at<float>(0, 1) << endl;
-    // cout << "result matrix:    " << result.at<float>(0, 3) << endl;
-    // cout << "result matrix:    " << result.at<float>(0, 4) << endl;
+    cout << "hi" << endl;
 
     // 012
     // 345
@@ -1066,8 +1054,8 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
                     } else if ((current_row >= (height / 3)) && (current_row <= (height / 3 * 2))) {
                         matrix_b.at<float>(count, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
 
-                        matrix_a.at<float>(count, 4) = (((width / 3) - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(count, 5) = ((current_col - 0) * (height - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(count, 4) = (((width / 3) - current_col) * (height / 3 * 2 - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(count, 5) = ((current_col - 0) * (height / 3 * 2 - current_row)) / temp; //(x-x1)(y-y1)
                         matrix_a.at<float>(count, 8) = ((width / 3 - current_col) * (current_row - height / 3)) / temp; // (x2-x)(y2-y)
                         matrix_a.at<float>(count, 9) = ((current_col - 0) * (current_row - height / 3)) / temp; //(x-x1)(y2-y)
 
@@ -1088,8 +1076,8 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
 
                         matrix_b.at<float>(count, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
 
-                        matrix_a.at<float>(count, 1) = ((width / 3 * 2 - current_col) * (height / 2 - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(count, 2) = ((current_col - width / 3) * (height / 2 - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(count, 1) = ((width / 3 * 2 - current_col) * (height / 3 - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(count, 2) = ((current_col - width / 3) * (height / 3 - current_row)) / temp; //(x-x1)(y-y1)
                         matrix_a.at<float>(count, 5) = ((width / 3 * 2 - current_col) * (current_row - 0)) / temp; // (x2-x)(y2-y)
                         matrix_a.at<float>(count, 6) = ((current_col - width / 3) * (current_row - 0)) / temp; //(x-x1)(y2-y)
 
@@ -1097,8 +1085,8 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
 
                         matrix_b.at<float>(count, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
 
-                        matrix_a.at<float>(count, 5) = ((width / 3 * 2 - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(count, 6) = ((current_col - width / 3) * (height - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(count, 5) = ((width / 3 * 2 - current_col) * (height / 3 * 2 - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(count, 6) = ((current_col - width / 3) * (height / 3 * 2 - current_row)) / temp; //(x-x1)(y-y1)
                         matrix_a.at<float>(count, 9) = ((width / 3 * 2 - current_col) * (current_row - height / 3)) / temp; // (x2-x)(y2-y)
                         matrix_a.at<float>(count, 10) = ((current_col - width / 3) * (current_row - height / 3)) / temp; //(x-x1)(y2-y)
 
@@ -1119,8 +1107,8 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
 
                         matrix_b.at<float>(count, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
 
-                        matrix_a.at<float>(count, 2) = ((width - current_col) * (height / 2 - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(count, 3) = ((current_col - width / 3 * 2) * (height / 2 - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(count, 2) = ((width - current_col) * (height / 3 - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(count, 3) = ((current_col - width / 3 * 2) * (height / 3 - current_row)) / temp; //(x-x1)(y-y1)
                         matrix_a.at<float>(count, 6) = ((width - current_col) * (current_row - 0)) / temp; // (x2-x)(y2-y)
                         matrix_a.at<float>(count, 7) = ((current_col - width / 3 * 2) * (current_row - 0)) / temp; //(x-x1)(y2-y)
 
@@ -1128,8 +1116,8 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
 
                         matrix_b.at<float>(count, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
 
-                        matrix_a.at<float>(count, 6) = ((width - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(count, 7) = ((current_col - width / 3 * 2) * (height - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(count, 6) = ((width - current_col) * (height / 3 * 2 - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(count, 7) = ((current_col - width / 3 * 2) * (height / 3 * 2 - current_row)) / temp; //(x-x1)(y-y1)
                         matrix_a.at<float>(count, 10) = ((width - current_col) * (current_row - height / 3)) / temp; // (x2-x)(y2-y)
                         matrix_a.at<float>(count, 11) = ((current_col - width / 3 * 2) * (current_row - height / 3)) / temp; //(x-x1)(y2-y)
 
@@ -1168,8 +1156,8 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
     cv::Mat test8 = cv::Mat::zeros(2, 2, CV_8UC1);
     cv::Mat test9 = cv::Mat::zeros(2, 2, CV_8UC1);
 
-    cv::solve(matrix_a, matrix_b, result, cv::DECOMP_NORMAL);
- 
+    cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
+
     for (int i = 0; i < 16; i++) {
         cout << "resut martix  i : " << i << "  " << result.at<float>(i, 0) << endl;
     }
@@ -1290,6 +1278,5 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
 
     return img;
 }
-
 
 //愈細mean愈細
