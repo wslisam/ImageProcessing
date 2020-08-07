@@ -47,15 +47,15 @@ int main(int argc, char** argv)
 
     // cv::imshow("sample ", img);
     // cv::imshow("mask after inverse", out_mask);
-    // cv::imshow("after filter", after_filter);
+    cv::imshow("after filter", after_filter);
 
     // cv::Mat test = gray_bilinear(after_filter);
     // cv::imshow("Bilinear Interpolation", test);
 
     // cv::imshow("planefit", after_seg_planefit);
-    cv::imshow("TDLR_planefit", final);
-    imwrite( "./images/2/mask_1_.bmp", out_mask );
-    imwrite( "./images/2/TDLR_fit_10_1.bmp", final );
+    cv::imshow("TMDLMR_planefit", final);
+    imwrite( "./images/test/test_filter_.bmp", after_filter );
+    imwrite( "./images/test/test_fit_5_1.bmp", final );
 
     cv::waitKey(0);
     cv::destroyAllWindows();
