@@ -872,6 +872,8 @@ cv::Mat gen2_planefit(cv::Mat img, cv::Mat mask)
         num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 5);
         cout << "num_of_sample:  " << num_of_sample[seg] << endl;
         general_planefit(m_roi, mask_roi, 5, num_of_sample[seg], 2, 2);
+        //  TMDLMR_planefit(m_roi, mask_roi, 5, num_of_sample[seg]);
+
         // cv::imshow("final", m_roi);
         // cv::waitKey(0);
     }
@@ -1367,7 +1369,6 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
     int index_in_result_matrix[4] = { 0 };
     int num_of_next_row = 0;
     int cp_num_in_row = num_col + 1;
-  
 
     for (int i = 0; i < num_row * num_col; i++) {
 
@@ -1380,10 +1381,10 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
             num_of_next_row++;
         }
 
-        cout << i << ": " << index_in_result_matrix[0];
-        cout << " " << index_in_result_matrix[1];
-        cout << " " << index_in_result_matrix[2];
-        cout << " " << index_in_result_matrix[3] << endl;
+        // cout << i << ": " << index_in_result_matrix[0];
+        // cout << " " << index_in_result_matrix[1];
+        // cout << " " << index_in_result_matrix[2];
+        // cout << " " << index_in_result_matrix[3] << endl;
 
         block[i].at<uchar>(0, 0) = result.at<float>(index_in_result_matrix[0], 0);
         block[i].at<uchar>(0, 1) = result.at<float>(index_in_result_matrix[1], 0);
@@ -1391,14 +1392,32 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
         block[i].at<uchar>(1, 1) = result.at<float>(index_in_result_matrix[3], 0);
     }
 
+    num_of_next_row = 0;
+
     for (int i = 0; i < num_row * num_col; i++) {
         cv::resize(block[i], dst[i], dsize, 0, 0, cv::INTER_LINEAR);
     }
 
-    dst[0].copyTo(final(cv::Rect(0, 0, dst[0].cols, dst[0].rows)));
-    dst[1].copyTo(final(cv::Rect(dst[0].cols, 0, dst[1].cols, dst[1].rows)));
-    dst[2].copyTo(final(cv::Rect(0, dst[0].rows, dst[2].cols, dst[2].rows)));
-    dst[3].copyTo(final(cv::Rect(dst[0].cols, dst[0].rows, dst[3].cols, dst[3].rows)));
+    for (int i = 0; i < num_row * num_col; i++) { //4
+
+        dst[i].copyTo(final(cv::Rect((i % num_col) * dst[0].cols, num_of_next_row * dst[0].rows, dst[i].cols, dst[i].rows)));
+
+        if ((i + 2 + num_of_next_row) % (cp_num_in_row) == 0) {
+            num_of_next_row++;
+        }
+    }
+
+    //   dst1.copyTo(final(cv::Rect(0, 0, dst1.cols, dst1.rows)));
+    // dst2.copyTo(final(cv::Rect(dst1.cols, 0, dst2.cols, dst2.rows)));
+    // dst3.copyTo(final(cv::Rect(dst1.cols * 2, 0, dst3.cols, dst3.rows)));
+
+    // dst4.copyTo(final(cv::Rect(0, dst1.rows, dst4.cols, dst4.rows)));
+    // dst5.copyTo(final(cv::Rect(dst4.cols, dst4.rows, dst5.cols, dst5.rows)));
+    // dst6.copyTo(final(cv::Rect(dst4.cols * 2, dst4.rows, dst6.cols, dst6.rows)));
+
+    // dst7.copyTo(final(cv::Rect(0, dst6.rows * 2, dst1.cols, dst7.rows)));
+    // dst8.copyTo(final(cv::Rect(dst7.cols, dst7.rows * 2, dst8.cols, dst8.rows)));
+    // dst9.copyTo(final(cv::Rect(dst7.cols * 2, dst7.rows * 2, dst9.cols, dst9.rows)));
 
     final.copyTo(img, mask_img);
 
