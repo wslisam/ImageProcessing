@@ -1278,9 +1278,10 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
 
 cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample, int num_row, int num_col)
 {
+
     int num_of_cp = 0;
     num_of_cp = (num_row + 1) * (num_col + 1);
-    cout << "num of cp= " << num_of_cp << endl;
+    // cout << "num of cp= " << num_of_cp << endl;
 
     cv::Mat final = cv::Mat::zeros(img.size(), CV_8UC1);
     cv::Mat result = cv::Mat::zeros(num_of_cp, 1, CV_32FC1);
@@ -1366,32 +1367,31 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
     int index_in_result_matrix[4] = { 0 };
     int num_of_next_row = 0;
     int cp_num_in_row = num_col + 1;
+  
+
     for (int i = 0; i < num_row * num_col; i++) {
 
-        if (num_of_next_row == 0) {
-            index_in_result_matrix[0] = i; //  0   1
-            index_in_result_matrix[1] = i + 1; //  1   2
-            index_in_result_matrix[2] = i + cp_num_in_row; //  3   4
-            index_in_result_matrix[3] = i + 1 + cp_num_in_row; //  4   5
-        } else {
+        index_in_result_matrix[0] = i + num_of_next_row;
+        index_in_result_matrix[1] = i + num_of_next_row + 1;
+        index_in_result_matrix[2] = i + num_of_next_row + cp_num_in_row;
+        index_in_result_matrix[3] = i + num_of_next_row + 1 + cp_num_in_row;
 
-            index_in_result_matrix[0] = i + 1;
-            index_in_result_matrix[1] = i + 1 + 1;
-            index_in_result_matrix[2] = i + 1 + cp_num_in_row;
-            index_in_result_matrix[3] = i + 1 + 1 + cp_num_in_row;
+        if ((i + 2 + num_of_next_row) % (cp_num_in_row) == 0) {
+            num_of_next_row++;
         }
+
+        cout << i << ": " << index_in_result_matrix[0];
+        cout << " " << index_in_result_matrix[1];
+        cout << " " << index_in_result_matrix[2];
+        cout << " " << index_in_result_matrix[3] << endl;
 
         block[i].at<uchar>(0, 0) = result.at<float>(index_in_result_matrix[0], 0);
         block[i].at<uchar>(0, 1) = result.at<float>(index_in_result_matrix[1], 0);
         block[i].at<uchar>(1, 0) = result.at<float>(index_in_result_matrix[2], 0);
         block[i].at<uchar>(1, 1) = result.at<float>(index_in_result_matrix[3], 0);
-
-        if ((i + 2) % (cp_num_in_row) == 0) {
-            num_of_next_row++;
-        }
     }
 
-      for (int i = 0; i < num_row * num_col; i++) {
+    for (int i = 0; i < num_row * num_col; i++) {
         cv::resize(block[i], dst[i], dsize, 0, 0, cv::INTER_LINEAR);
     }
 
