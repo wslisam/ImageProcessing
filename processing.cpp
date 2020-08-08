@@ -344,10 +344,7 @@ cv::Mat cal_and_cut(cv::Mat img, cv::Mat mask, int sample_size)
     return final;
 }
 
-cv::Mat single_planefit(cv::Mat contour_region, cv::Mat mask_region,
-    int sample_size, vector<vector<int>> M_B,
-    vector<vector<float>> M_A, int num_of_sample,
-    vector<vector<pair<int, int>>> rect_coord)
+cv::Mat single_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, vector<vector<int>> M_B, vector<vector<float>> M_A, int num_of_sample, vector<vector<pair<int, int>>> rect_coord)
 {
     cv::imshow("ROI", contour_region);
     // cv::imshow("MASKROI", mask_region);
@@ -874,7 +871,7 @@ cv::Mat gen2_planefit(cv::Mat img, cv::Mat mask)
         cout << "seg: " << seg << endl;
         num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 5);
         cout << "num_of_sample:  " << num_of_sample[seg] << endl;
-        TMDLMR_planefit(m_roi, mask_roi, 5, num_of_sample[seg]);
+        general_planefit(m_roi, mask_roi, 5, num_of_sample[seg], 2, 2);
         // cv::imshow("final", m_roi);
         // cv::waitKey(0);
     }
@@ -1279,4 +1276,129 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
     return img;
 }
 
-//愈細mean愈細
+cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample, int num_row, int num_col)
+{
+    int num_of_cp = 0;
+    num_of_cp = (num_row + 1) * (num_col + 1);
+    cout<<"num of cp= " << num_of_cp<<endl;
+
+    cv::Mat final = cv::Mat::zeros(img.size(), CV_8UC1);
+    cv::Mat result = cv::Mat::zeros(num_of_cp, 1, CV_32FC1);
+    cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, num_of_cp, CV_32FC1);
+    cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
+
+    int height = img.rows;
+    int width = img.cols;
+    int count = 0;
+
+    float temp;
+    int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
+
+    int row_num_in_matrix = 0;
+
+    for (int current_row = 0; current_row < height; current_row += sample_size) {
+        for (int current_col = 0; current_col < width; current_col += sample_size) {
+
+            if (mask_img.at<uchar>(current_row, current_col) > 0) {
+
+                temp = (height / 2 * (width / 2.0));
+
+                if (current_col <= (width / 2)) { // 左
+                    if (current_row <= (height / 2)) {
+                        //上
+                        matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
+
+                        matrix_a.at<float>(row_num_in_matrix, 0) = (((width / 2) - current_col) * (height / 2 - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 1) = ((current_col - 0) * (height / 2 - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 3) = ((width / 2 - current_col) * (current_row - 0)) / temp; // (x2-x)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 4) = ((current_col - 0) * (current_row - 0)) / temp; //(x-x1)(y2-y)
+                    } else if (current_row > (height / 2)) {
+                        matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
+
+                        matrix_a.at<float>(row_num_in_matrix, 3) = (((width / 2) - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 4) = ((current_col - 0) * (height - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 6) = ((width / 2 - current_col) * (current_row - height / 2)) / temp; // (x2-x)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 7) = ((current_col - 0) * (current_row - height / 2)) / temp; //(x-x1)(y2-y)
+                    }
+
+                    row_num_in_matrix++;
+
+                } else if (current_col > (width / 2)) {
+                    if (current_row <= (height / 2)) {
+
+                        matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
+
+                        matrix_a.at<float>(row_num_in_matrix, 1) = ((width - current_col) * (height / 2 - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 2) = ((current_col - width / 2) * (height / 2 - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 4) = ((width - current_col) * (current_row - 0)) / temp; // (x2-x)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 5) = ((current_col - width / 2) * (current_row - 0)) / temp; //(x-x1)(y2-y)
+
+                    } else if (current_row > (height / 2)) {
+
+                        matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
+
+                        matrix_a.at<float>(row_num_in_matrix, 4) = ((width - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 5) = ((current_col - width / 2) * (height - current_row)) / temp; //(x-x1)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 7) = ((width - current_col) * (current_row - height / 2)) / temp; // (x2-x)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 8) = ((current_col - width / 2) * (current_row - height / 2)) / temp; //(x-x1)(y2-y)
+                    }
+
+                    row_num_in_matrix++;
+                }
+            }
+        }
+    }
+
+    cv::Size dsize = cv::Size(width / (num_col * 1.0), height / (num_row * 1.0));
+   
+
+    vector<cv::Mat> dst;
+    for (int i = 0; i < (num_col * num_row); i++) {
+        dst.push_back(cv::Mat::zeros(2,2, CV_8UC1));
+    }
+    vector<cv::Mat> block;
+
+    for (int i = 0; i < (num_col * num_row); i++) {
+        block.push_back(cv::Mat::zeros(2, 2, CV_8UC1));
+    }
+
+
+    cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
+
+    // for (int i = 0; i < num_row * num_col; i++) {
+    // }
+   
+    block[0].at<uchar>(0, 0) = result.at<float>(0, 0);
+    block[0].at<uchar>(0, 1) = result.at<float>(1, 0);
+    block[0].at<uchar>(1, 0) = result.at<float>(3, 0);
+    block[0].at<uchar>(1, 1) = result.at<float>(4, 0);
+
+    block[1].at<uchar>(0, 0) = result.at<float>(1, 0);
+    block[1].at<uchar>(0, 1) = result.at<float>(2, 0);
+    block[1].at<uchar>(1, 0) = result.at<float>(4, 0);
+    block[1].at<uchar>(1, 1) = result.at<float>(5, 0);
+
+    block[2].at<uchar>(0, 0) = result.at<float>(3, 0);
+    block[2].at<uchar>(0, 1) = result.at<float>(4, 0);
+    block[2].at<uchar>(1, 0) = result.at<float>(6, 0);
+    block[2].at<uchar>(1, 1) = result.at<float>(7, 0);
+
+    block[3].at<uchar>(0, 0) = result.at<float>(4, 0);
+    block[3].at<uchar>(0, 1) = result.at<float>(5, 0);
+    block[3].at<uchar>(1, 0) = result.at<float>(7, 0);
+    block[3].at<uchar>(1, 1) = result.at<float>(8, 0);
+   
+
+    for (int i = 0; i < num_row * num_col; i++) {
+        cv::resize(block[i], dst[i], dsize, 0, 0, cv::INTER_LINEAR);
+    }
+
+    dst[0].copyTo(final(cv::Rect(0, 0, dst[0].cols, dst[0].rows)));
+    dst[1].copyTo(final(cv::Rect(dst[0].cols, 0, dst[1].cols, dst[1].rows)));
+    dst[2].copyTo(final(cv::Rect(0, dst[0].rows, dst[2].cols, dst[2].rows)));
+    dst[3].copyTo(final(cv::Rect(dst[0].cols, dst[0].rows, dst[3].cols, dst[3].rows)));
+
+    final.copyTo(img, mask_img);
+
+    return img;
+}
