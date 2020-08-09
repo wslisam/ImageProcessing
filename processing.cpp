@@ -1295,8 +1295,26 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
     int width = img.cols;
     int count = 0;
 
-    float temp;
+    float size_of_block;
     int y_0 = 0, y_1 = 0, x_0 = 0, x_1 = 0;
+
+
+    int index_for_rect[num_row * num_col][4] = { 0 };
+    int go_to_next_row = 0;
+    int num_of_in_row = num_col + 1;
+
+    for (int i = 0; i < num_row * num_col; i++) {
+
+        index_for_rect[i][0] = i + go_to_next_row;
+        index_for_rect[i][1] = i + go_to_next_row + 1;
+        index_for_rect[i][2] = i + go_to_next_row + num_of_in_row;
+        index_for_rect[i][3] = i + go_to_next_row + 1 + num_of_in_row;
+
+        if ((i + 2 + go_to_next_row) % (num_of_in_row) == 0) {
+            go_to_next_row++;
+        }
+    }
+    go_to_next_row = 0;
 
     int row_num_in_matrix = 0;
 
@@ -1305,50 +1323,43 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
 
             if (mask_img.at<uchar>(current_row, current_col) > 0) {
 
-                temp = (height / 2 * (width / 2.0));
+                size_of_block = (height / num_row * (width / num_col * 1.0));
+                matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
 
-                if (current_col <= (width / 2)) { // 左
-                    if (current_row <= (height / 2)) {
-                        //上
-                        matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
+  
 
-                        matrix_a.at<float>(row_num_in_matrix, 0) = (((width / 2) - current_col) * (height / 2 - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(row_num_in_matrix, 1) = ((current_col - 0) * (height / 2 - current_row)) / temp; //(x-x1)(y-y1)
-                        matrix_a.at<float>(row_num_in_matrix, 3) = ((width / 2 - current_col) * (current_row - 0)) / temp; // (x2-x)(y2-y)
-                        matrix_a.at<float>(row_num_in_matrix, 4) = ((current_col - 0) * (current_row - 0)) / temp; //(x-x1)(y2-y)
-                    } else if (current_row > (height / 2)) {
-                        matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
+                if (current_col <= (width / num_col)) { // 左
+                    if (current_row <= (height / num_row)) {
 
-                        matrix_a.at<float>(row_num_in_matrix, 3) = (((width / 2) - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(row_num_in_matrix, 4) = ((current_col - 0) * (height - current_row)) / temp; //(x-x1)(y-y1)
-                        matrix_a.at<float>(row_num_in_matrix, 6) = ((width / 2 - current_col) * (current_row - height / 2)) / temp; // (x2-x)(y2-y)
-                        matrix_a.at<float>(row_num_in_matrix, 7) = ((current_col - 0) * (current_row - height / 2)) / temp; //(x-x1)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 0) = (((width / 2) - current_col) * (height / 2 - current_row)) / size_of_block; // (x2-x)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 1) = ((current_col - 0) * (height / 2 - current_row)) / size_of_block; //(x-x1)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 3) = ((width / 2 - current_col) * (current_row - 0)) / size_of_block; // (x2-x)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 4) = ((current_col - 0) * (current_row - 0)) / size_of_block; //(x-x1)(y2-y)
+                    } else if (current_row > (height / num_row)) {
+
+                        matrix_a.at<float>(row_num_in_matrix, 3) = (((width / 2) - current_col) * (height - current_row)) / size_of_block; // (x2-x)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 4) = ((current_col - 0) * (height - current_row)) / size_of_block; //(x-x1)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 6) = ((width / 2 - current_col) * (current_row - height / 2)) / size_of_block; // (x2-x)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 7) = ((current_col - 0) * (current_row - height / 2)) / size_of_block; //(x-x1)(y2-y)
                     }
 
-                    row_num_in_matrix++;
+                } else if (current_col > (width / num_col)) {
+                    if (current_row <= (height / num_row)) {
 
-                } else if (current_col > (width / 2)) {
-                    if (current_row <= (height / 2)) {
+                        matrix_a.at<float>(row_num_in_matrix, 1) = ((width - current_col) * (height / 2 - current_row)) / size_of_block; // (x2-x)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 2) = ((current_col - width / 2) * (height / 2 - current_row)) / size_of_block; //(x-x1)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 4) = ((width - current_col) * (current_row - 0)) / size_of_block; // (x2-x)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 5) = ((current_col - width / 2) * (current_row - 0)) / size_of_block; //(x-x1)(y2-y)
 
-                        matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
+                    } else if (current_row > (height / num_row)) {
 
-                        matrix_a.at<float>(row_num_in_matrix, 1) = ((width - current_col) * (height / 2 - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(row_num_in_matrix, 2) = ((current_col - width / 2) * (height / 2 - current_row)) / temp; //(x-x1)(y-y1)
-                        matrix_a.at<float>(row_num_in_matrix, 4) = ((width - current_col) * (current_row - 0)) / temp; // (x2-x)(y2-y)
-                        matrix_a.at<float>(row_num_in_matrix, 5) = ((current_col - width / 2) * (current_row - 0)) / temp; //(x-x1)(y2-y)
-
-                    } else if (current_row > (height / 2)) {
-
-                        matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
-
-                        matrix_a.at<float>(row_num_in_matrix, 4) = ((width - current_col) * (height - current_row)) / temp; // (x2-x)(y-y1)
-                        matrix_a.at<float>(row_num_in_matrix, 5) = ((current_col - width / 2) * (height - current_row)) / temp; //(x-x1)(y-y1)
-                        matrix_a.at<float>(row_num_in_matrix, 7) = ((width - current_col) * (current_row - height / 2)) / temp; // (x2-x)(y2-y)
-                        matrix_a.at<float>(row_num_in_matrix, 8) = ((current_col - width / 2) * (current_row - height / 2)) / temp; //(x-x1)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 4) = ((width - current_col) * (height - current_row)) / size_of_block; // (x2-x)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 5) = ((current_col - width / 2) * (height - current_row)) / size_of_block; //(x-x1)(y-y1)
+                        matrix_a.at<float>(row_num_in_matrix, 7) = ((width - current_col) * (current_row - height / 2)) / size_of_block; // (x2-x)(y2-y)
+                        matrix_a.at<float>(row_num_in_matrix, 8) = ((current_col - width / 2) * (current_row - height / 2)) / size_of_block; //(x-x1)(y2-y)
                     }
-
-                    row_num_in_matrix++;
                 }
+                row_num_in_matrix++;
             }
         }
     }
@@ -1360,7 +1371,6 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
         dst.push_back(cv::Mat::zeros(2, 2, CV_8UC1));
     }
     vector<cv::Mat> block;
-
     for (int i = 0; i < (num_col * num_row); i++) {
         block.push_back(cv::Mat::zeros(2, 2, CV_8UC1));
     }
@@ -1382,15 +1392,15 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
             num_of_next_row++;
         }
 
-        // cout << i << ": " << index_in_result_matrix[0];
-        // cout << " " << index_in_result_matrix[1];
-        // cout << " " << index_in_result_matrix[2];
-        // cout << " " << index_in_result_matrix[3] << endl;
-
         block[i].at<uchar>(0, 0) = result.at<float>(index_in_result_matrix[0], 0);
         block[i].at<uchar>(0, 1) = result.at<float>(index_in_result_matrix[1], 0);
         block[i].at<uchar>(1, 0) = result.at<float>(index_in_result_matrix[2], 0);
         block[i].at<uchar>(1, 1) = result.at<float>(index_in_result_matrix[3], 0);
+
+        // cout << i << ": " << index_in_result_matrix[0];
+        // cout << " " << index_in_result_matrix[1];
+        // cout << " " << index_in_result_matrix[2];
+        // cout << " " << index_in_result_matrix[3] << endl;
     }
 
     num_of_next_row = 0;
