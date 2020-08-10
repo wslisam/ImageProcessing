@@ -129,7 +129,41 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
     return coord;
 }
 
-cv::Mat LR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample)
+cv::Mat planefit(cv::Mat img, cv::Mat mask)
+{
+    int height = img.rows;
+    int width = img.cols;
+
+    vector<vector<cv::Point>> contours;
+    findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    vector<vector<pair<int, int>>> rect_coord = rect_contours(img, contours);
+    int num_of_sample[contours.size()]; // seg幾 左定右region
+
+    cv::Mat m_roi;
+    cv::Mat mask_roi;
+
+    for (int seg = 0; seg < contours.size(); seg++) {
+        m_roi = img(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second,
+            rect_coord[seg][1].first - rect_coord[seg][0].first,
+            rect_coord[seg][2].second - rect_coord[seg][0].second));
+
+        mask_roi = mask(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second,
+            rect_coord[seg][1].first - rect_coord[seg][0].first,
+            rect_coord[seg][2].second - rect_coord[seg][0].second));
+
+        cout << "seg: " << seg << endl;
+        num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 4);
+        cout << "num_of_sample:  " << num_of_sample[seg] << endl;
+        general_planefit(m_roi, mask_roi, 4, num_of_sample[seg], 2, 2);
+        //  TDLR_planefit(m_roi, mask_roi, 5, num_of_sample[seg]);
+
+        // cv::imshow("final", m_roi);
+        // cv::waitKey(0);
+    }
+    return img;
+}
+
+cv::Mat LR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample) // 1x2
 {
     cv::Mat final = cv::Mat::zeros(img.size(), CV_8UC1);
     cv::Mat result = cv::Mat::zeros(6, 1, CV_32FC1);
@@ -273,41 +307,7 @@ cv::Mat LR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_s
     return img;
 }
 
-cv::Mat planefit(cv::Mat img, cv::Mat mask)
-{
-    int height = img.rows;
-    int width = img.cols;
-
-    vector<vector<cv::Point>> contours;
-    findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-    vector<vector<pair<int, int>>> rect_coord = rect_contours(img, contours);
-    int num_of_sample[contours.size()]; // seg幾 左定右region
-
-    cv::Mat m_roi;
-    cv::Mat mask_roi;
-
-    for (int seg = 0; seg < contours.size(); seg++) {
-        m_roi = img(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second,
-            rect_coord[seg][1].first - rect_coord[seg][0].first,
-            rect_coord[seg][2].second - rect_coord[seg][0].second));
-
-        mask_roi = mask(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second,
-            rect_coord[seg][1].first - rect_coord[seg][0].first,
-            rect_coord[seg][2].second - rect_coord[seg][0].second));
-
-        cout << "seg: " << seg << endl;
-        num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 4);
-        cout << "num_of_sample:  " << num_of_sample[seg] << endl;
-        general_planefit(m_roi, mask_roi, 4, num_of_sample[seg], 2, 2);
-        //  TDLR_planefit(m_roi, mask_roi, 5, num_of_sample[seg]);
-
-        // cv::imshow("final", m_roi);
-        // cv::waitKey(0);
-    }
-    return img;
-}
-
-cv::Mat TDLR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample)
+cv::Mat TDLR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample) // 2x2
 {
     cv::Mat final = cv::Mat::zeros(img.size(), CV_8UC1);
     cv::Mat result = cv::Mat::zeros(9, 1, CV_32FC1);
@@ -440,7 +440,7 @@ cv::Mat TDLR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of
     return img;
 }
 
-cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample)
+cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample) // 3x3
 {
     cv::Mat final = cv::Mat::zeros(img.size(), CV_8UC1);
     cv::Mat result = cv::Mat::zeros(16, 1, CV_32FC1);
@@ -834,7 +834,7 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
         cv::resize(block[i], dst[i], dsize, 0, 0, cv::INTER_LINEAR);
     }
 
-    for (int i = 0; i < num_row * num_col; i++) { 
+    for (int i = 0; i < num_row * num_col; i++) {
         dst[i].copyTo(final(cv::Rect((i % num_col) * dst[0].cols, num_of_next_row * dst[0].rows, dst[i].cols, dst[i].rows)));
         //  cout<<" dst["<<i<<"].copyTo(final(cv::Rect(("<<(i % num_col) <<"  * dst[0].cols  "<< num_of_next_row<<"   * dst[0].rows"<< "dst["<<i<<"].cols, dst["<<i<<"].rows)))"<<endl;
 
