@@ -15,7 +15,9 @@
         "array": "cpp",
         "string_view": "cpp",
         "map": "cpp",
-        "unordered_map": "cpp"
+        "unordered_map": "cpp",
+        "__locale": "cpp",
+        "__string": "cpp"
     },
     "lldb.showDisassembly": "auto",
     "lldb.dereferencePointers": true
