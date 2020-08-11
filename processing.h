@@ -26,6 +26,12 @@ struct grid_struct {
     cv::Mat ref_plane; // plane既樣 （形容個order係左至右，上至下）
 };
 
+struct final_struct{
+    vector<grid_struct> grid_vector;
+    cv::Mat whole_plane;
+
+};
+
 int find_num_obj_using_ConnectedComponents(cv::Mat img);
 int find_num_obj_using_contours(cv::Mat img);
 int get_num_sample(cv::Mat img, cv::Mat mask, int sample_size);
@@ -34,9 +40,9 @@ cv::Mat BGR2GRAY(cv::Mat input);
 cv::Mat filter(cv::Mat input, cv::Mat mask); // masking
 vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Point>> contours);
 
-cv::Mat planefit(cv::Mat img, cv::Mat mask); //function to call different kind of planefit
+final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col); //function to call different kind of planefit
 
-cv::Mat general_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample, int num_row, int num_col); // mean decrease if num_row , num col increase
+grid_struct general_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample, int num_row, int num_col); // mean decrease if num_row , num col increase
 cv::Mat LR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 1x2
 cv::Mat TDLR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 2x2
 cv::Mat TMDLMR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 3x3

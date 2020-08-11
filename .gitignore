@@ -9,3 +9,5 @@ build/IMV_project
 # macOS Files
 .DS_Store
 clang.md
+*.png
+link.md

@@ -129,7 +129,7 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
     return coord;
 }
 
-cv::Mat planefit(cv::Mat img, cv::Mat mask)
+final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col)
 {
     int height = img.rows;
     int width = img.cols;
@@ -141,6 +141,8 @@ cv::Mat planefit(cv::Mat img, cv::Mat mask)
 
     cv::Mat m_roi;
     cv::Mat mask_roi;
+    final_struct final_result;
+    grid_struct grid;
 
     for (int seg = 0; seg < contours.size(); seg++) {
         m_roi = img(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second,
@@ -154,13 +156,27 @@ cv::Mat planefit(cv::Mat img, cv::Mat mask)
         cout << "seg: " << seg << endl;
         num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 4);
         cout << "num_of_sample:  " << num_of_sample[seg] << endl;
-        general_planefit(m_roi, mask_roi, 4, num_of_sample[seg], 2, 2);
+
+        grid = general_planefit(m_roi, mask_roi, 4, num_of_sample[seg], num_row, num_col);
+
+        final_result.grid_vector.push_back(grid);
+
+        // imshow("888",grid.ref_plane);
         //  TDLR_planefit(m_roi, mask_roi, 5, num_of_sample[seg]);
 
         // cv::imshow("final", m_roi);
         // cv::waitKey(0);
     }
-    return img;
+
+    // int temp = (num_col + 1) * (num_row + 1);
+    // cout << ">>>>>>>>>>>>>>>>" << endl;
+    // for (int i = 0; i < temp; i++) {
+    //     cout << final_result.grid_vector[3].point[i].z_value << endl;
+    // }
+    // cout << ">>>>>>>>>>>>>>>>" << endl;
+
+    final_result.whole_plane = img;
+    return final_result;
 }
 
 cv::Mat LR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample) // 1x2
@@ -705,7 +721,7 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
     return img;
 }
 
-cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample, int num_row, int num_col)
+grid_struct general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample, int num_row, int num_col)
 {
     int height = img.rows;
     int width = img.cols;
@@ -843,7 +859,25 @@ cv::Mat general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num
         }
     }
 
+    cp_struct cp;
+    grid_struct grid;
+
+    for (int k = 0; k <= num_row; k++) {
+        for (int i = 0; i <= num_col; i++) {
+
+            cp.x_coord = width / num_col * i;
+            cp.y_coord = height / num_row * k;
+            cp.z_value = result.at<float>((num_col + 1) * k + i, 0);
+            // cout << "value x: " << cp.x_coord << endl;
+            // cout << "value y: " << cp.y_coord << endl;
+            // cout << "value z: " << cp.z_value << endl;
+            grid.point.push_back(cp);
+        }
+    }
+
+    grid.ref_plane = final;
+
     final.copyTo(img, mask_img);
 
-    return img;
+    return grid;
 }
