@@ -157,7 +157,7 @@ final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col)
         num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 4);
         cout << "num_of_sample:  " << num_of_sample[seg] << endl;
 
-        grid = general_planefit(m_roi, mask_roi, 4, num_of_sample[seg], num_row, num_col);
+        grid = general_planefit(m_roi, mask_roi, 4, num_of_sample[seg], num_row, num_col, rect_coord[seg]);
 
         final_result.grid_vector.push_back(grid);
 
@@ -721,7 +721,7 @@ cv::Mat TMDLMR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_
     return img;
 }
 
-grid_struct general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample, int num_row, int num_col)
+grid_struct general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample, int num_row, int num_col, vector<pair<int, int>> rect)
 {
     int height = img.rows;
     int width = img.cols;
@@ -779,7 +779,7 @@ grid_struct general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int
                     count_width--;
                 }
 
-                cout << "ch:  " << count_height << endl;
+                // cout << "ch:  " << count_height << endl;
                 // cout<< "  cw:  " << count_width << endl;
                 x_0 = current_col;
                 x_2 = (width / num_col * 1.0) * count_width;
@@ -865,8 +865,8 @@ grid_struct general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int
     for (int k = 0; k <= num_row; k++) {
         for (int i = 0; i <= num_col; i++) {
 
-            cp.x_coord = width / num_col * i;
-            cp.y_coord = height / num_row * k;
+            cp.x_coord = rect[0].first + width / num_col * i;
+            cp.y_coord = rect[0].second + height / num_row * k;
             cp.z_value = result.at<float>((num_col + 1) * k + i, 0);
             // cout << "value x: " << cp.x_coord << endl;
             // cout << "value y: " << cp.y_coord << endl;

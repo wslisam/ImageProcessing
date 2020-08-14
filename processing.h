@@ -42,7 +42,7 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
 
 final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col); //function to call different kind of planefit
 
-grid_struct general_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample, int num_row, int num_col); // mean decrease if num_row , num col increase
+grid_struct general_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample, int num_row, int num_col,vector<pair<int, int>> rect); // mean decrease if num_row , num col increase
 cv::Mat LR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 1x2
 cv::Mat TDLR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 2x2
 cv::Mat TMDLMR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 3x3
