@@ -54,8 +54,8 @@ int get_num_sample(cv::Mat img, cv::Mat mask, int sample_size)
     int num_of_sample = 0;
     // int num_of_region = 2;
 
-    for (int y = 0; y < height; y += sample_size) {
-        for (int x = 0; x < width; x += sample_size) {
+    for (int y = 0 + 1; y < height - 1; y += sample_size) {
+        for (int x = 0 + 1; x < width - 1; x += sample_size) {
             if (mask.at<uchar>(y, x) >= 0) {
                 num_of_sample++;
             }
@@ -157,7 +157,7 @@ final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col)
         num_of_sample[seg] = get_num_sample(m_roi, mask_roi, 4);
         cout << "num_of_sample:  " << num_of_sample[seg] << endl;
 
-        grid = general_planefit(m_roi, mask_roi, 4, num_of_sample[seg], num_row, num_col, rect_coord[seg]);
+        grid = gen2_general_planefit(m_roi, mask_roi, 4, num_of_sample[seg], num_row, num_col, rect_coord[seg]);
 
         final_result.grid_vector.push_back(grid);
 
@@ -796,6 +796,260 @@ grid_struct general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int
                 matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][2]) = (x_2 - x_0) * (y_0 - y_2) / size_of_block;
                 matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][3]) = (x_0 - x_1) * (y_0 - y_2) / size_of_block;
                 row_num_in_matrix++;
+
+                // cout<<"hi" <<(x_2 - x_0) * (y_1 - y_0) / size_of_block <<endl;
+                if (current_col < (width / 2)) {
+                    if (current_row < (height / 2)) {
+                        cout << "value " << matrix_b.at<float>(row_num_in_matrix - 1, 0)
+                             << " " << matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][0])
+                             << " " << matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][1])
+                             << " " << matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][2])
+                             << " " << matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][3]) << endl;
+
+                        cout << "index for  " << index_for_rect[pos_index][0] << " >>> " << index_for_rect[pos_index][1] << ">> " << index_for_rect[pos_index][2] << " >>>>" << index_for_rect[pos_index][3] << endl;
+                    }
+                }
+
+                // cout << "value : " << matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][0]) << endl;
+                // cout << "value : " << matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][1]) << endl;
+                // cout << "value : " << matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][2]) << endl;
+                // cout << "value : " << matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][3]) << endl;
+                // cout << "value : " << matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][0]) + matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][1]) + matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][2]) + matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][3]) << endl;
+            }
+        }
+    }
+
+    vector<cv::Mat> dst;
+    vector<cv::Mat> block;
+    cv::Size dsize = cv::Size(width / (num_col * 1.0), height / (num_row * 1.0));
+
+    for (int i = 0; i < (num_col * num_row); i++) {
+        dst.push_back(cv::Mat::zeros(2, 2, CV_8UC1));
+        block.push_back(cv::Mat::zeros(2, 2, CV_8UC1));
+    }
+
+    cv::solve(matrix_a, matrix_b, result, cv::DECOMP_SVD);
+
+    cout << "<<<<<<<<<<<<" << endl;
+    for (int i = 0; i < num_of_cp; i++) {
+        cout << "result matrix: " << i << "  " << result.at<float>(i, 0) << endl;
+    }
+    cout << "<<<<<<<<<<<<" << endl;
+
+    int index_in_result_matrix[4] = { 0 };
+    int num_of_next_row = 0;
+    int cp_num_in_row = num_col + 1;
+
+    for (int i = 0; i < num_row * num_col; i++) {
+
+        index_in_result_matrix[0] = i + num_of_next_row;
+        index_in_result_matrix[1] = i + num_of_next_row + 1;
+        index_in_result_matrix[2] = i + num_of_next_row + cp_num_in_row;
+        index_in_result_matrix[3] = i + num_of_next_row + 1 + cp_num_in_row;
+
+        if ((i + 2 + num_of_next_row) % (cp_num_in_row) == 0) {
+            num_of_next_row++;
+        }
+
+        block[i].at<uchar>(0, 0) = result.at<float>(index_in_result_matrix[0], 0);
+        block[i].at<uchar>(0, 1) = result.at<float>(index_in_result_matrix[1], 0);
+        block[i].at<uchar>(1, 0) = result.at<float>(index_in_result_matrix[2], 0);
+        block[i].at<uchar>(1, 1) = result.at<float>(index_in_result_matrix[3], 0);
+    }
+
+    num_of_next_row = 0;
+
+    for (int i = 0; i < num_row * num_col; i++) {
+        cv::resize(block[i], dst[i], dsize, 0, 0, cv::INTER_LINEAR);
+    }
+
+    for (int i = 0; i < num_row * num_col; i++) {
+        dst[i].copyTo(final(cv::Rect((i % num_col) * dst[0].cols, num_of_next_row * dst[0].rows, dst[i].cols, dst[i].rows)));
+        //  cout<<" dst["<<i<<"].copyTo(final(cv::Rect(("<<(i % num_col) <<"  * dst[0].cols  "<< num_of_next_row<<"   * dst[0].rows"<< "dst["<<i<<"].cols, dst["<<i<<"].rows)))"<<endl;
+
+        if ((i + 2 + num_of_next_row) % (cp_num_in_row) == 0) {
+            num_of_next_row++;
+        }
+    }
+
+    cp_struct cp;
+    grid_struct grid;
+
+    for (int k = 0; k <= num_row; k++) {
+        for (int i = 0; i <= num_col; i++) {
+
+            cp.x_coord = rect[0].first + width / num_col * i;
+            cp.y_coord = rect[0].second + height / num_row * k;
+            cp.z_value = result.at<float>((num_col + 1) * k + i, 0);
+            // cout << "value x: " << cp.x_coord << endl;
+            // cout << "value y: " << cp.y_coord << endl;
+            // cout << "value z: " << cp.z_value << endl;
+            grid.point.push_back(cp);
+        }
+    }
+
+    grid.ref_plane = final;
+
+    final.copyTo(img, mask_img);
+
+    return grid;
+}
+
+// cv::Mat frameDiff(cv::Mat prevFrame, cv::Mat curFrame, cv::Mat nextFrame)
+// {
+//     cv::Mat diffFrames1, diffFrames2, output;
+//     // Compute absolute difference between current frame and the next frame
+//     cv::absdiff(nextFrame, curFrame, diffFrames1);
+//     // Compute absolute difference between current frame and the previous frame
+//     cv::absdiff(curFrame, prevFrame, diffFrames2);
+//     // Bitwise "AND" operation between the above two diff images
+//     cv:::bitwise_and(diffFrames1, diffFrames2, output);
+//     return output;
+// }
+
+cv::Mat Diff(cv::Mat filter, cv::Mat refplane)
+{
+    cv::Mat output;
+    // Compute absolute difference between current frame and the next frame
+    cv::absdiff(filter, refplane, output);
+    cv::imshow("diff", output);
+
+    return output;
+}
+
+//rating
+//相減 bright /dark // orgian - ref / ref-
+//apply thresold
+// 40 /60 /80    // 解釋
+//2x2 / 3x3
+//general defect inspection
+// mearsure size
+//diff buffer  // defect 白色
+// threshold value different    // sensiti
+//0 background //255   //
+//bright /dart  / abs
+
+grid_struct gen2_general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample, int num_row, int num_col, vector<pair<int, int>> rect)
+{
+    int height = img.rows;
+    int width = img.cols;
+    int num_of_cp = (num_row + 1) * (num_col + 1);
+
+    cv::Mat final = cv::Mat::zeros(img.size(), CV_8UC1);
+    cv::Mat result = cv::Mat::zeros(num_of_cp, 1, CV_32FC1);
+    cv::Mat matrix_a = cv::Mat::zeros(num_of_sample, num_of_cp, CV_32FC1);
+    cv::Mat matrix_b = cv::Mat::zeros(num_of_sample, 1, CV_32FC1);
+
+    int count = 0;
+
+    float size_of_block;
+
+    int index_for_rect[num_row * num_col][4];
+    memset(index_for_rect, 0, num_row * num_col * sizeof(int) * 4);
+    int go_to_next_row = 0;
+    int num_of_in_row = num_col + 1;
+
+    for (int i = 0; i < num_row * num_col; i++) {
+
+        index_for_rect[i][0] = i + go_to_next_row;
+        index_for_rect[i][1] = i + go_to_next_row + 1;
+        index_for_rect[i][2] = i + go_to_next_row + num_of_in_row;
+        index_for_rect[i][3] = i + go_to_next_row + 1 + num_of_in_row;
+
+        if ((i + 2 + go_to_next_row) % (num_of_in_row) == 0) {
+            go_to_next_row++;
+        }
+        cout << i << ": " << index_for_rect[i][0];
+        cout << " " << index_for_rect[i][1];
+        cout << " " << index_for_rect[i][2];
+        cout << " " << index_for_rect[i][3] << endl;
+    }
+    go_to_next_row = 0;
+
+    int row_num_in_matrix = 0;
+    float y_0 = 0, y_1 = 0, y_2 = 0, x_0 = 0, x_1 = 0, x_2 = 0;
+    int count_width = 0, count_height = 0;
+    int pos_index = 0;
+
+    float dx, dy;
+
+    for (int current_row = 0 + 1; current_row < height - 1; current_row += sample_size) {
+        for (int current_col = 0 + 1; current_col < width - 1; current_col += sample_size) {
+
+            if (mask_img.at<uchar>(current_row, current_col) > 0) {
+
+                size_of_block = (height / num_row * (width * 1.0 / num_col));
+                matrix_b.at<float>(row_num_in_matrix, 0) = img.at<uchar>(current_row, current_col); // y 行 第x個
+
+                count_height = current_row / (height / num_row * 1.0);
+                count_width = current_col / (width / num_col * 1.0);
+                if (count_height == num_row) {
+                    count_height--;
+                }
+                if (count_width == num_col) {
+                    count_width--;
+                }
+
+                // cout << "ch:  " << count_height << endl;
+                // cout<< "  cw:  " << count_width << endl;
+                x_0 = current_col;
+                x_2 = (width / num_col * 1.0) * (count_width + 1);
+                if (count_width >= 1) {
+                    x_1 = x_2 - width / num_col * 1.0;
+                } else {
+                    x_1 = 0;
+                }
+
+                y_0 = current_row;
+                y_1 = (height / num_row * 1.0) * (count_height + 1);
+                if (count_height >= 1) {
+                    y_2 = y_1 - height / num_row * 1.0; //small;
+                } else {
+                    y_2 = 0;
+                }
+
+                pos_index = count_height * num_col + count_width;
+
+                dx = (current_col - x_1) / (x_2 - x_1);
+                dy = (current_row - y_2) / (y_1 - y_2);
+                //  cout << "1dx: " << dx << "1dy:  " << dy << endl;
+                // cout << " row 1 : " << current_col << "  x1 " << x_1 << " " << (x_2 - x_1) << endl;
+                // cout << " row 1.1 : " << current_col- x_1 << " " << (x_2 - x_1) << endl;
+
+                // cout << " row 2 : " << current_row << "  y2 " << y_2 << " " << (y_1 - y_2) << endl;
+
+                //  cout<<" row 2 : " <<(current_col - x_1)  <<" "<< (x_2 - x_1) <<endl;
+                // dx = (x_0-x_1) / (width * 1.0 / num_col);
+                // dy = (y_0 - y_2) / (height / num_row * 1.0);
+                // cout << "dx: " << dx << "dy:  " << dy << endl;
+                // matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][0]) = (1. - dx) * dy;
+                // matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][1]) = dx * dy;
+                // matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][2]) = (1.0 - dx) * (1.0 - dy);
+                // matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][3]) = dx * (1.0 - dy);
+
+                matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][0]) = ((x_2 - x_0) / (width * 1.0 / num_col)) * ((y_1 - y_0) / (height / num_row * 1.0));
+                matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][1]) = ((x_0 - x_1) / (width * 1.0 / num_col)) * ((y_1 - y_0) / (height / num_row * 1.0));
+                matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][2]) = ((x_2 - x_0) / (width * 1.0 / num_col)) * ((y_0 - y_2) / (height / num_row * 1.0));
+                matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][3]) = ((x_0 - x_1) / (width * 1.0 / num_col)) * ((y_0 - y_2) / (height / num_row * 1.0));
+                row_num_in_matrix++;
+
+                // cout<<"hi" <<(x_2 - x_0) * (y_1 - y_0) / size_of_block <<endl;
+                if (current_col < (width / 2)) {
+                    if (current_row < (height / 2)) {
+                        // cout << "value "
+                        //      << ((x_2 - x_0) / (width * 1.0 / num_col)) << "  " << ((y_1 - y_0) / (height / num_row * 1.0)) << "  "
+                        //      << ((x_0 - x_1) / (width * 1.0 / num_col)) << "  " << ((y_1 - y_0) / (height / num_row * 1.0)) << "  "
+                        //      << ((x_2 - x_0) / (width * 1.0 / num_col)) << "  " << ((y_0 - y_2) / (height / num_row * 1.0)) << "  "
+                        //      << ((x_0 - x_1) / (width * 1.0 / num_col)) << "  " << ((y_0 - y_2) / (height / num_row * 1.0)) << endl;
+                        // cout << "value " << matrix_b.at<float>(row_num_in_matrix - 1, 0)<<
+                           cout<< matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][0])
+                            +matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][1])
+                            +matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][2])
+                            +matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][3]) << endl;
+
+                        // cout << "index for  " << index_for_rect[pos_index][0] << " >>> " << index_for_rect[pos_index][1] << ">> " << index_for_rect[pos_index][2] << " >>>>" << index_for_rect[pos_index][3] << endl;
+                    }
+                }
 
                 // cout << "value : " << matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][0]) << endl;
                 // cout << "value : " << matrix_a.at<float>(row_num_in_matrix, index_for_rect[pos_index][1]) << endl;
