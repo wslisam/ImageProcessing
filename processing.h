@@ -50,5 +50,6 @@ cv::Mat TDLR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_si
 cv::Mat TMDLMR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 3x3
 
 cv::Mat Diff(cv::Mat filter, cv::Mat refplane);
+cv::Mat sub(cv::Mat old , cv::Mat thenew);
 
 #endif

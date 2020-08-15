@@ -162,7 +162,8 @@ final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col)
         final_result.grid_vector.push_back(grid);
 
         // imshow("888",grid.ref_plane);
-        //  TDLR_planefit(m_roi, mask_roi, 5, num_of_sample[seg]);
+        // cout<<"TMDLMR"<<endl;
+        //  TMDLMR_planefit(m_roi, mask_roi, 4, num_of_sample[seg]);
 
         // cv::imshow("final", m_roi);
         // cv::waitKey(0);
@@ -342,8 +343,8 @@ cv::Mat TDLR_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of
     //678
 
     count = 0;
-    for (int current_row = 0; current_row < height; current_row += sample_size) {
-        for (int current_col = 0; current_col < width; current_col += sample_size) {
+    for (int current_row = 0 + 1; current_row < height - 1; current_row += sample_size) {
+        for (int current_col = 0 + 1; current_col < width - 1; current_col += sample_size) {
 
             if (mask_img.at<uchar>(current_row, current_col) > 0) {
 
@@ -917,8 +918,20 @@ cv::Mat Diff(cv::Mat filter, cv::Mat refplane)
     return output;
 }
 
-//rating
-//相減 bright /dark // orgian - ref / ref-
+cv::Mat sub(cv::Mat old, cv::Mat refplane)
+{
+    cv::Mat dark, bright;
+    
+    cv::subtract(refplane, old, dark); //dark def
+    cv::subtract(old, refplane, bright); //bright def
+
+    cv::imshow("dark", dark);
+    cv::imshow("Bright", bright);
+
+
+    return dark;
+}
+
 //apply thresold
 // 40 /60 /80    // 解釋
 //2x2 / 3x3
@@ -1042,10 +1055,11 @@ grid_struct gen2_general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size
                         //      << ((x_2 - x_0) / (width * 1.0 / num_col)) << "  " << ((y_0 - y_2) / (height / num_row * 1.0)) << "  "
                         //      << ((x_0 - x_1) / (width * 1.0 / num_col)) << "  " << ((y_0 - y_2) / (height / num_row * 1.0)) << endl;
                         // cout << "value " << matrix_b.at<float>(row_num_in_matrix - 1, 0)<<
-                           cout<< matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][0])
-                            +matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][1])
-                            +matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][2])
-                            +matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][3]) << endl;
+                        cout << matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][0])
+                                + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][1])
+                                + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][2])
+                                + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][3])
+                             << endl;
 
                         // cout << "index for  " << index_for_rect[pos_index][0] << " >>> " << index_for_rect[pos_index][1] << ">> " << index_for_rect[pos_index][2] << " >>>>" << index_for_rect[pos_index][3] << endl;
                     }
