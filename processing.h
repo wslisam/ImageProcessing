@@ -51,5 +51,6 @@ cv::Mat TMDLMR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_
 
 cv::Mat Diff(cv::Mat filter, cv::Mat refplane);
 cv::Mat sub(cv::Mat old , cv::Mat thenew);
+cv::Mat Binarize(cv::Mat gray, int threshold);
 
 #endif

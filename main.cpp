@@ -2,8 +2,8 @@
 
 int main(int argc, char** argv)
 {
-    cv::Mat img = cv::imread("./Surface_Fitting_image/3/Input3.bmp"); //source img
-    cv::Mat mask = cv::imread("./Surface_Fitting_image/3/mask.bmp"); //mask of source img
+    cv::Mat img = cv::imread("./Surface_Fitting_image/1/Input3.bmp"); //source img
+    cv::Mat mask = cv::imread("./Surface_Fitting_image/1/mask.bmp"); //mask of source img
 
     if (img.empty()) { // warning if cannot read the file
         cout << "!! Failed imread(): image not found !!" << endl;
@@ -22,6 +22,7 @@ int main(int argc, char** argv)
     cv::imshow("Ref_planefit_result_image", ref_img.whole_plane);
     // Diff(after_filter,ref_img.whole_plane);
     sub(after_filter,ref_img.whole_plane);
+    
 
 
     // cv::imwrite("./images/test/filter.bmp", after_filter);

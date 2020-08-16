@@ -921,26 +921,53 @@ cv::Mat Diff(cv::Mat filter, cv::Mat refplane)
 cv::Mat sub(cv::Mat old, cv::Mat refplane)
 {
     cv::Mat dark, bright;
-    
+
     cv::subtract(refplane, old, dark); //dark def
     cv::subtract(old, refplane, bright); //bright def
+
+    // background 係  0  = black , defect in white
+
+    dark = Binarize(dark, 35);
+    bright = Binarize(bright, 35);
 
     cv::imshow("dark", dark);
     cv::imshow("Bright", bright);
 
-
     return dark;
+
+    //when the value of threshold goes up , the defect cannot be recognised.
+    // 10 就太細  35 淨係見到一條彎
 }
 
-//apply thresold
+cv::Mat Binarize(cv::Mat gray, int threshold)
+{
+    int width = gray.cols;
+    int height = gray.rows;
+
+    // prepare output
+    cv::Mat out = cv::Mat::zeros(height, width, CV_8UC1);
+
+    // each y, x
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            // Binarize
+            if (gray.at<uchar>(y, x) > threshold) {
+                out.at<uchar>(y, x) = 255;
+            } else {
+                out.at<uchar>(y, x) = 0;
+            }
+        }
+    }
+
+    return out;
+}
+
 // 40 /60 /80    // 解釋
 //2x2 / 3x3
 //general defect inspection
-// mearsure size
-//diff buffer  // defect 白色
+// mearsure size of defect
+//diff buffer 
 // threshold value different    // sensiti
-//0 background //255   //
-//bright /dart  / abs
 
 grid_struct gen2_general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int num_of_sample, int num_row, int num_col, vector<pair<int, int>> rect)
 {
