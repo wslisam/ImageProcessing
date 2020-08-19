@@ -26,10 +26,11 @@ struct grid_struct {
     cv::Mat ref_plane; // plane既樣 （形容個order係左至右，上至下）
 };
 
-struct final_struct{
+struct final_struct {
     vector<grid_struct> grid_vector;
     cv::Mat whole_plane;
-
+    cv::Mat dark;
+    cv::Mat bright;
 };
 
 int find_num_obj_using_ConnectedComponents(cv::Mat img);
@@ -42,15 +43,18 @@ vector<vector<pair<int, int>>> rect_contours(cv::Mat img, vector<vector<cv::Poin
 
 final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col); //function to call different kind of planefit
 
-grid_struct general_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample, int num_row, int num_col,vector<pair<int, int>> rect); // mean decrease if num_row , num col increase
-grid_struct gen2_general_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample, int num_row, int num_col,vector<pair<int, int>> rect); // mean decrease if num_row , num col increase
+grid_struct general_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample, int num_row, int num_col, vector<pair<int, int>> rect); // mean decrease if num_row , num col increase
+grid_struct gen2_general_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample, int num_row, int num_col, vector<pair<int, int>> rect); // mean decrease if num_row , num col increase
 
 cv::Mat LR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 1x2
 cv::Mat TDLR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 2x2
 cv::Mat TMDLMR_planefit(cv::Mat contour_region, cv::Mat mask_region, int sample_size, int num_of_sample); // 3x3
 
 cv::Mat Diff(cv::Mat filter, cv::Mat refplane);
-cv::Mat sub(cv::Mat old , cv::Mat thenew);
+cv::Mat bright_and_dark(cv::Mat old, cv::Mat thenew, int threshold);
+
+cv::Mat dark(cv::Mat old, cv::Mat thenew, int threshold);
+cv::Mat bright(cv::Mat old, cv::Mat thenew, int threshold);
 cv::Mat Binarize(cv::Mat gray, int threshold);
 
 #endif
