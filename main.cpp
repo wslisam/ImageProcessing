@@ -21,8 +21,8 @@ int main(int argc, char** argv)
     // cv::imshow("Ref_planefit_result_image", ref_img.whole_plane);
     // Diff(after_filter,ref_img.whole_plane);
     // sub(after_filter,ref_img.whole_plane);
-    ref_img.dark = dark(after_filter, ref_img.whole_plane, 35);
-    ref_img.bright = bright(after_filter, ref_img.whole_plane, 35);
+    ref_img.dark = dark_otsu(after_filter, ref_img.whole_plane);
+    ref_img.bright = bright_otsu(after_filter, ref_img.whole_plane);
 
     // cv::imwrite("./images/new/2by3_filter.bmp", after_filter);
     // cv::imwrite("./images/new/2by3_result.bmp", ref_img.whole_plane);
