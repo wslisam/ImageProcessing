@@ -1200,11 +1200,11 @@ grid_struct gen2_general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size
                         //      << ((x_2 - x_0) / (width * 1.0 / num_col)) << "  " << ((y_0 - y_2) / (height / num_row * 1.0)) << "  "
                         //      << ((x_0 - x_1) / (width * 1.0 / num_col)) << "  " << ((y_0 - y_2) / (height / num_row * 1.0)) << endl;
                         // cout << "value " << matrix_b.at<float>(row_num_in_matrix - 1, 0)<<
-                        cout << matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][0])
-                                + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][1])
-                                + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][2])
-                                + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][3])
-                             << endl;
+                        // cout << matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][0])
+                        //         + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][1])
+                        //         + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][2])
+                        //         + matrix_a.at<float>(row_num_in_matrix - 1, index_for_rect[pos_index][3])
+                        //      << endl;
 
                         // cout << "index for  " << index_for_rect[pos_index][0] << " >>> " << index_for_rect[pos_index][1] << ">> " << index_for_rect[pos_index][2] << " >>>>" << index_for_rect[pos_index][3] << endl;
                     }
@@ -1293,4 +1293,51 @@ grid_struct gen2_general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size
     final.copyTo(img, mask_img);
 
     return grid;
+}
+
+int find_defects_using_contours(cv::Mat img)
+{
+    vector<vector<cv::Point>> contours;
+
+    findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    cv::Mat output = cv::Mat::zeros(img.rows, img.cols, CV_8UC3);
+
+    if (contours.size() == 0) {
+        cout << "No objects detected" << endl;
+        return 0;
+    } else {
+        cout << "Number of objects detected: " << contours.size() << endl;
+    }
+
+    // double max_area = 10;
+    // for (int i = 0; i < contours.size(); i++) // iterate through each contour.
+    // {
+    //     double area = contourArea(contours[i], false); //  Find the area of contour
+
+    //     if (area > max_area && area < 8000) {
+    //         max_area = area;
+    //     } else {
+    //         contours.erase(contours.begin() + i);
+    //     }
+    // }
+    // cout<<max_area<<endl;
+
+    double min_area = 10; // area threshold
+    for (int i = 0; i < contours.size(); i++) // iterate through each contour.
+    {
+        double area = contourArea(contours[i], false); //  Find the area of contour
+        if (area >= min_area) {
+            cout << "area:" << area << endl;
+            rectangle(output, boundingRect(contours[i]), cv::Scalar(255, 0, 255), 0);
+            cv::drawContours(output, contours, i, 0x0000FFFF);
+        }
+    }   
+
+    // cv::imwrite("./images/new/4_dark_defect_contours.bmp", output);
+    // cv::imwrite("./images/new/4_bright_defect_contours.bmp", output);
+    
+    cv::imshow("Contours Result", output);
+
+    return contours.size();
 }

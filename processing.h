@@ -60,5 +60,7 @@ cv::Mat bright_otsu(cv::Mat old, cv::Mat thenew);
 
 cv::Mat Binarize(cv::Mat gray, int threshold);
 cv::Mat Binarize_otsu(cv::Mat gray);
+int find_defects_using_contours(cv::Mat img);
+
 
 #endif
