@@ -6,9 +6,11 @@ build/IMV_project
 *.log
 
 
+.vscode
 # macOS Files
 .DS_Store
 clang.md
 *.png
 link.md
 *.zip
+

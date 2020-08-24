@@ -2,8 +2,8 @@
 
 int main(int argc, char** argv)
 {
-    cv::Mat img = cv::imread("./Surface_Fitting_image/4/Input3.bmp"); //source img
-    cv::Mat mask = cv::imread("./Surface_Fitting_image/4/mask.bmp"); //mask of source img
+    cv::Mat img = cv::imread("./Surface_Fitting_image/6/Input3.bmp"); //source img
+    cv::Mat mask = cv::imread("./Surface_Fitting_image/6/mask.bmp"); //mask of source img
 
     if (img.empty()) { // warning if cannot read the file
         cout << "!! Failed imread(): image not found !!" << endl;
@@ -11,6 +11,8 @@ int main(int argc, char** argv)
     }
 
     img = BGR2GRAY(img); // change the img to grayscale first
+    // cv::imwrite("./images/new/8_gray.bmp", img);
+
 
     cv::Mat out_mask = BGR2GRAY(~mask); // inverse the mask and RGB to grayscale image
     cv::Mat after_filter = filter(img, out_mask); // masking
@@ -21,15 +23,15 @@ int main(int argc, char** argv)
     cv::imshow("Ref_planefit_result_image", ref_img.whole_plane);
     // Diff(after_filter,ref_img.whole_plane);
     // sub(after_filter,ref_img.whole_plane);
-    // ref_img.dark = dark(after_filter.clone(), ref_img.whole_plane.clone(), 30);
-    // find_defects_using_contours(ref_img.dark);
-    ref_img.bright = bright(after_filter, ref_img.whole_plane, 35);
-    find_defects_using_contours(ref_img.bright);
+    ref_img.dark = dark(after_filter.clone(), ref_img.whole_plane.clone(), 10);
+    find_defects_using_contours(ref_img.dark);
+    // ref_img.bright = bright(after_filter, ref_img.whole_plane, 15);
+    // find_defects_using_contours(ref_img.bright);
 
-    // cv::imwrite("./images/new/4_dark.bmp", ref_img.dark);
+    // cv::imwrite("./images/new/8_dark.bmp", ref_img.dark);
     // cv::imwrite("./images/new/4_bright.bmp", ref_img.bright);
 
-    // cv::imwrite("./images/new/4_ref.bmp", ref_img.whole_plane);
+    // cv::imwrite("./images/new/8_ref.bmp", ref_img.whole_plane);
 
 
 
@@ -45,3 +47,16 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
+
+//rotate rectangle 框
+//dis conti 
+//for connnected compo
+// input label mat = 1 , put into vector
+// minarea 
+//defect area / rect area 滿唔滿   area ratio , defect 特性   , center  列表  , defect info / point住 /  cropp 佢出黎 (rect )
+// width height ratio -> point line defect 
+ //HSV colour domain defect 
+ //set colour range   ／／ HSV  -> v 決定光定暗
+ 
+//save point into a vector
