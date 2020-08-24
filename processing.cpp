@@ -143,6 +143,12 @@ final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col)
     cv::Mat mask_roi;
     final_struct final_result;
     grid_struct grid;
+    double total_area = 0.0;
+
+    for (int seg = 0; seg < contours.size(); seg++) {
+        total_area += (rect_coord[seg][1].first - rect_coord[seg][0].first) * (rect_coord[seg][2].second - rect_coord[seg][0].second);
+        // cout << " total_area " << total_area << endl;
+    }
 
     for (int seg = 0; seg < contours.size(); seg++) {
         m_roi = img(cv::Rect(rect_coord[seg][0].first, rect_coord[seg][0].second,
@@ -177,6 +183,8 @@ final_struct planefit(cv::Mat img, cv::Mat mask, int num_row, int num_col)
     // cout << ">>>>>>>>>>>>>>>>" << endl;
 
     final_result.whole_plane = img;
+    final_result.area = total_area;
+    // cout << "area:  " << final_result.area << endl;
     return final_result;
 }
 
@@ -477,8 +485,9 @@ grid_struct general_planefit(cv::Mat img, cv::Mat mask_img, int sample_size, int
     return grid;
 }
 
-int find_defects_using_contours(cv::Mat img)
+int find_defects_using_contours(cv::Mat img, double total_area)
 {
+
     vector<vector<cv::Point>> contours;
 
     findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -504,12 +513,14 @@ int find_defects_using_contours(cv::Mat img)
     //     }
     // }
     // cout<<max_area<<endl;
-
+    cv::RNG rng(0xFFFFFFFF);
     double min_area = 15; // area threshold
+    double total_defect_area = 0.0;
+    double area_ratio = 0.0;
 
     vector<cv::RotatedRect> minRect(contours.size());
     vector<cv::RotatedRect> minEllipse(contours.size());
-    for (size_t i = 0; i < contours.size(); i++) {
+    for (int i = 0; i < contours.size(); i++) {
         minRect[i] = minAreaRect(contours[i]);
         if (contours[i].size() > 5) {
             minEllipse[i] = fitEllipse(contours[i]);
@@ -518,20 +529,33 @@ int find_defects_using_contours(cv::Mat img)
 
     for (int i = 0; i < contours.size(); i++) // iterate through each contour.
     {
-        double area = contourArea(contours[i], false); //  Find the area of contour
-        if (area >= min_area) {
-            cout << "area:" << area << endl;
+        double defect_area = contourArea(contours[i], false); //  Find the area of contour
+        if (defect_area >= min_area) {
+            cout << "defect area " << i << " : " << defect_area << endl;
+            total_defect_area = total_defect_area + defect_area;
+            cv::Scalar color = cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256));
             //normal rect
             // rectangle(output, boundingRect(contours[i]), cv::Scalar(255, 0, 255), 0);
-    
-            // cv::drawContours(output, contours, i, cv::Scalar(255, 255, 255));
+
+            // contour
+            cv::drawContours(output, contours, i, cv::Scalar(255, 255, 255));
+
+            // ellipse
+            // ellipse(output, minEllipse[i], color, 2);
+
+            // rotated rectangle
             cv::Point2f rect_points[4];
             minRect[i].points(rect_points);
             for (int j = 0; j < 4; j++) {
-                cv::line(output, rect_points[j], rect_points[(j + 1) % 4], cv::Scalar(255, 0, 255));
+                cv::line(output, rect_points[j], rect_points[(j + 1) % 4], color, 1);
             }
         }
     }
+
+    area_ratio = total_defect_area / total_area;
+    cout << "total defect area : " << total_defect_area << endl;
+    cout << "total  area : " << total_area << endl;
+    cout << "area ratio : " << area_ratio << endl;
 
     // cv::imwrite("./images/new/8_dark_defect_contours.bmp", output);
     // cv::imwrite("./images/new/8_bright_defect_contours.bmp", output);
@@ -541,20 +565,52 @@ int find_defects_using_contours(cv::Mat img)
     return contours.size();
 }
 
-int find_defects_using_ConnectedComponents(cv::Mat img)
+static cv::Scalar randomColor(cv::RNG& rng)
+{
+    int icolor = (unsigned)rng;
+    return cv::Scalar(icolor & 255, (icolor >> 8) & 255, (icolor >> 16) & 255);
+}
+
+int find_defects_using_ConnectedComponents(cv::Mat img, double total_area)
 {
     // Use connected components to divide our possibles parts of images
-    cv::Mat labels;
-    int num_objects = connectedComponents(img, labels); // connectivity=8 , type = CV_32S
+    cv::Mat labels, stats, centroids;
+    int num_objects = connectedComponentsWithStats(img, labels, stats, centroids);
 
-    // Check the number of objects detected
-    // background = 1
     if (num_objects < 2) {
         cout << "No objects detected" << endl;
         return num_objects - 1;
     } else {
         cout << "Number of objects detected: " << num_objects - 1 << endl;
     }
+
+    double min_area = 15; // area threshold
+    double total_defect_area = 0.0;
+    double area_ratio = 0.0;
+    cv::Mat output = cv::Mat::zeros(img.rows, img.cols, CV_8UC3);
+    cv::RNG rng(0xFFFFFFFF);
+    for (int i = 1; i < num_objects; i++) {
+        cout << "Object " << i << " with pos: " << centroids.at<cv::Point2d>(i)
+             << " with area " << stats.at<int>(i, cv::CC_STAT_AREA) << endl;
+        double defect_area = stats.at<int>(i, cv::CC_STAT_AREA);
+
+        cv::Mat mask = labels == i;
+        output.setTo(randomColor(rng), mask);
+
+        if (defect_area >= min_area) {
+            stringstream ss;
+            ss << "area: " << stats.at<int>(i, cv::CC_STAT_AREA);
+            cv::putText(output,
+                ss.str(),
+                centroids.at<cv::Point2d>(i),
+                cv::FONT_HERSHEY_SIMPLEX,
+                0.4,
+                cv::Scalar(255, 255, 255), 0);
+        }
+    }
+ 
+
+    cv::imshow("ConnectedComponents Result", output);
 
     return num_objects - 1;
 }

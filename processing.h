@@ -32,6 +32,7 @@ struct final_struct {
     cv::Mat whole_plane;
     cv::Mat dark;
     cv::Mat bright;
+    double area;
 };
 
 int find_num_obj_using_ConnectedComponents(cv::Mat img);
@@ -51,7 +52,8 @@ cv::Mat dark(cv::Mat old, cv::Mat thenew, int threshold); // show the dark defec
 cv::Mat bright(cv::Mat old, cv::Mat thenew, int threshold); // show the bright defect
 cv::Mat Binarize(cv::Mat gray, int threshold); // apply thresholding
 
-int find_defects_using_contours(cv::Mat img);
-int find_defects_using_ConnectedComponents(cv::Mat img);
+int find_defects_using_contours(cv::Mat img, double total_area);
+int find_defects_using_ConnectedComponents(cv::Mat img, double total_area);
+static cv::Scalar randomColor( cv::RNG& rng );
 
 #endif
