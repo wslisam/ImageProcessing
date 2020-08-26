@@ -490,7 +490,7 @@ int find_defects_using_contours(cv::Mat img, double total_area)
 
     vector<vector<cv::Point>> contours;
 
-    findContours(img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    findContours(img, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
 
     cv::Mat output = cv::Mat::zeros(img.rows, img.cols, CV_8UC3);
 
@@ -517,11 +517,41 @@ int find_defects_using_contours(cv::Mat img, double total_area)
     double min_area = 15; // area threshold
     double total_defect_area = 0.0;
     double area_ratio = 0.0;
+    double height_width_ratio = 0.0;
+    int defect_num = 0;
 
     vector<cv::RotatedRect> minRect(contours.size());
     vector<cv::RotatedRect> minEllipse(contours.size());
+
+    cout << endl
+         << "<-----Defect_Rectangle_Info----->" << endl;
+
     for (int i = 0; i < contours.size(); i++) {
         minRect[i] = minAreaRect(contours[i]);
+
+        // // Force largest side is the height
+        // if (minRect[i].size.width > minRect[i].size.height) {
+        //     cv::swap(minRect[i].size.width, minRect[i].size.height);
+        //     minRect[i].angle += 90.f;
+        // }
+
+        if (minRect[i].size.height != 0 && minRect[i].size.width != 0) {
+            cout << endl;
+            cout << "Defect : " << i + 1 << endl
+                 << "  height : " << minRect[i].size.height << "  width : " << minRect[i].size.width << endl;
+
+            height_width_ratio = max(minRect[i].size.height, minRect[i].size.width) / min(minRect[i].size.height, minRect[i].size.width);
+
+            cout << "  Height to width ratio: " << height_width_ratio << endl;
+            if (height_width_ratio > 2) {
+                cout << "@--->This is a line defect !!!" << endl;
+            } else if (height_width_ratio < 1.2 && height_width_ratio > 0.8) {
+                cout << "@--->This is a point defect !!!" << endl;
+            }
+            cout << endl;
+            defect_num++;
+        }
+
         if (contours[i].size() > 5) {
             minEllipse[i] = fitEllipse(contours[i]);
         }
@@ -530,8 +560,11 @@ int find_defects_using_contours(cv::Mat img, double total_area)
     for (int i = 0; i < contours.size(); i++) // iterate through each contour.
     {
         double defect_area = contourArea(contours[i], false); //  Find the area of contour
+        // int defect_area = contours[i].size(); //  Find the area of contour
+
         if (defect_area >= min_area) {
-            cout << "defect area " << i << " : " << defect_area << endl;
+            // cout << "defect area " << i << " : " << defect_area << endl;
+
             total_defect_area = total_defect_area + defect_area;
             cv::Scalar color = cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256));
             //normal rect
@@ -552,13 +585,22 @@ int find_defects_using_contours(cv::Mat img, double total_area)
         }
     }
 
-    area_ratio = total_defect_area / total_area;
-    cout << "total defect area : " << total_defect_area << endl;
-    cout << "total  area : " << total_area << endl;
-    cout << "area ratio : " << area_ratio << endl;
+    cout << "Number of defects detected : " << defect_num << endl;
 
-    // cv::imwrite("./images/new/8_dark_defect_contours.bmp", output);
-    // cv::imwrite("./images/new/8_bright_defect_contours.bmp", output);
+    // cout << "<-----Defect_Info----->" << endl;
+
+    area_ratio = total_defect_area / total_area;
+    // cout << endl;
+    // cout << "<-----Area_Info----->" << endl
+    //      << endl;
+    // cout << "Total defect area : " << total_defect_area << endl;
+    // cout << "Total  area : " << total_area << endl;
+    // cout << "area ratio : " << area_ratio << endl
+    //      << endl;
+    // cout << "<-----Area_Info----->" << endl;
+
+    // cv::imwrite("./images/final/11_dark_defect_contours.bmp", output);
+    cv::imwrite("./images/final/11_bright_defect_contours.bmp", output);
 
     cv::imshow("Contours Result", output);
 
@@ -587,30 +629,49 @@ int find_defects_using_ConnectedComponents(cv::Mat img, double total_area)
     double min_area = 15; // area threshold
     double total_defect_area = 0.0;
     double area_ratio = 0.0;
+    double defect_area = 0.0;
     cv::Mat output = cv::Mat::zeros(img.rows, img.cols, CV_8UC3);
     cv::RNG rng(0xFFFFFFFF);
+    cout << "<-----defect_info----->" << endl;
     for (int i = 1; i < num_objects; i++) {
-        cout << "Object " << i << " with pos: " << centroids.at<cv::Point2d>(i)
-             << " with area " << stats.at<int>(i, cv::CC_STAT_AREA) << endl;
-        double defect_area = stats.at<int>(i, cv::CC_STAT_AREA);
 
+        //  << " with area " << stats.at<int>(i, cv::CC_STAT_AREA) << endl;
+        double defect_area = stats.at<int>(i, cv::CC_STAT_AREA);
+        total_defect_area = total_defect_area + defect_area;
+        cout << "defect " << i << " area : " << defect_area
+             << " with centroids: " << centroids.at<cv::Point2d>(i) << endl;
         cv::Mat mask = labels == i;
         output.setTo(randomColor(rng), mask);
 
         if (defect_area >= min_area) {
             stringstream ss;
-            ss << "area: " << stats.at<int>(i, cv::CC_STAT_AREA);
+            ss << "Area:" << stats.at<int>(i, cv::CC_STAT_AREA);
+            cv::Point pos;
+            pos.x = centroids.at<cv::Point2d>(i).x - 25;
+            pos.y = centroids.at<cv::Point2d>(i).y + 30;
             cv::putText(output,
                 ss.str(),
-                centroids.at<cv::Point2d>(i),
+                // centroids.at<cv::Point2d>(i),
+                pos,
                 cv::FONT_HERSHEY_SIMPLEX,
-                0.4,
+                0.3,
                 cv::Scalar(255, 255, 255), 0);
         }
     }
- 
+
+    area_ratio = total_defect_area / total_area;
+    cout << endl;
+    cout << "<-----Area_Info----->" << endl
+         << endl;
+    cout << "Total defect area : " << total_defect_area << endl;
+    cout << "Total  area : " << total_area << endl;
+    cout << "area ratio : " << area_ratio << endl
+         << endl;
 
     cv::imshow("ConnectedComponents Result", output);
+
+    // cv::imwrite("./images/final/11_dark_defect_connected.bmp", output);
+    cv::imwrite("./images/final/11_bright_defect_connected.bmp", output);
 
     return num_objects - 1;
 }
