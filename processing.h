@@ -24,7 +24,7 @@ struct cp_struct { // control point (角既point)
 
 struct grid_struct {
     vector<cp_struct> point; // block struct {width , heigh}
-    cv::Mat ref_plane; // plane既樣 （形容個order係左至右，上至下）
+    cv::Mat ref_plane; // planeInter既樣 （形容個order係左至右，上至下）
 };
 
 struct final_struct {

@@ -544,9 +544,9 @@ int find_defects_using_contours(cv::Mat img, double total_area)
 
             cout << "  Height to width ratio: " << height_width_ratio << endl;
             if (height_width_ratio > 2) {
-                cout << "@--->This is a line defect !!!" << endl;
+                cout << "@--->This is a line defect !!!";
             } else if (height_width_ratio < 1.2 && height_width_ratio > 0.8) {
-                cout << "@--->This is a point defect !!!" << endl;
+                cout << "@--->This is a point defect !!!";
             }
             cout << endl;
             defect_num++;
@@ -599,8 +599,8 @@ int find_defects_using_contours(cv::Mat img, double total_area)
     //      << endl;
     // cout << "<-----Area_Info----->" << endl;
 
-    // cv::imwrite("./images/final/11_dark_defect_contours.bmp", output);
-    cv::imwrite("./images/final/11_bright_defect_contours.bmp", output);
+    // cv::imwrite("./images/final/8dark_defect_contours.bmp", output);
+    cv::imwrite("./images/final/8_bright_defect_contours.bmp", output);
 
     cv::imshow("Contours Result", output);
 
@@ -670,8 +670,8 @@ int find_defects_using_ConnectedComponents(cv::Mat img, double total_area)
 
     cv::imshow("ConnectedComponents Result", output);
 
-    // cv::imwrite("./images/final/11_dark_defect_connected.bmp", output);
-    cv::imwrite("./images/final/11_bright_defect_connected.bmp", output);
+    // cv::imwrite("./images/final/8_dark_defect_connected.bmp", output);
+    cv::imwrite("./images/final/8_bright_defect_connected.bmp", output);
 
     return num_objects - 1;
 }
