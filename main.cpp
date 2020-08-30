@@ -60,3 +60,13 @@ int main(int argc, char** argv)
 // debuf flag
 // defect inpsection cpp
 // planefitting cpp
+
+// Find width and height of RotatedRect
+
+// You can find width and height of the rotated rect with:
+
+// rect = cv2.minAreaRect(contour)
+// (x, y), (width, height), angle = rect
+// Then the aspect ratio is:
+
+// aspect_ratio = min(width, height) / max(width, height)
